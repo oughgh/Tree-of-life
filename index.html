@@ -156,12 +156,15 @@ $("zi").onclick=()=>{zoom=Math.min(2.5,zoom+.15);render()};$("zo").onclick=()=>{
 $("dn").onclick=()=>{depth=Math.min(RANKS.length,depth+1);ov.clear();render()};$("up").onclick=()=>{depth=Math.max(0,depth-1);ov.clear();render()};
 $("wrap").addEventListener("wheel",e=>{if(e.ctrlKey){e.preventDefault();zoom=Math.min(2.5,Math.max(.3,zoom*(e.deltaY<0?1.1:.9)));render()}},{passive:false});
 $("imp").onclick=()=>$("f").click();
-$("f").onchange=async e=>{const R=csv((await e.target.files[0].text()).replace(/^\uFEFF/,"")),h=R[0].map(x=>x.trim().toLowerCase());
- let i=h.indexOf("taxon_species_name");if(i<0)i=h.findIndex(x=>/^scientific[ _]name$/.test(x));if(i<0)i=h.findIndex(x=>/scientific[ _]name/.test(x));
- if(i<0)return notify("No scientific name column found. Columns seen: "+h.slice(0,8).join(", "));
- const names=new Set(D.map(d=>d.s)),all=new Set(),miss=new Set(),b0=life.size;
- R.slice(1).forEach(r=>{const w=(r[i]||"").trim().split(/\s+/).slice(0,2);if(w.length<2)return;const c=w.join(" ");all.add(c);if(names.has(c))life.add(c);else miss.add(c)});
- save();render();notify(`✓ Life list imported: ${life.size-b0} new species added (${all.size-miss.size} of ${all.size} species in the file matched the loaded list). Your list now has ${life.size}.`+(miss.size?" Unmatched names are usually species missing from the loaded list or named differently there.":""))};
+$("f").onchange=async e=>{const tx=(await e.target.files[0].text()).replace(/^\uFEFF/,""),l1=tx.split(/\r?\n/)[0],
+  dl=[",",";","\t","|"].map(c=>[c,l1.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0],R=csv(tx,dl),h=R[0].map(x=>x.trim().toLowerCase()),
+  names=new Set(D.map(d=>d.s)),bn=v=>{const w=(v||"").replace(/_/g," ").trim().split(/\s+/).slice(0,2);return w.length<2?"":w.join(" ")};
+ const pref=j=>{const k=["taxon_species_name","scientific_name","scientific name","species","taxon_name","name"].indexOf(h[j]);return k<0?99:k};
+ let best=-1,bs=0;h.forEach((_,j)=>{let n=0;for(let k=1;k<Math.min(R.length,6000);k++)if(names.has(bn(R[k][j])))n++;if(n>bs||(n&&n===bs&&pref(j)<pref(best))){bs=n;best=j}});
+ if(best<0)return notify("No column in this file matches the loaded species list. Make sure your species list (and mammals, if needed) is loaded first. Columns seen: "+h.slice(0,8).join(", "));
+ const all=new Set(),miss=new Set(),b0=life.size;
+ R.slice(1).forEach(r=>{const c=bn(r[best]);if(!c)return;all.add(c);if(names.has(c))life.add(c);else miss.add(c)});
+ save();render();notify(`✓ Life list imported from column "${h[best]}": ${life.size-b0} new species added (${all.size-miss.size} of ${all.size} species in the file matched the loaded list). Your list now has ${life.size}.`)};
 const RANKS=[["k","Kingdom"],["p","Phylum"],["cl","Class"],["sc","Subclass"],["ic","Infraclass"],["mg","Magnorder"],["so","Superorder"],["cd","Clade"],["o","Order"],["sb","Suborder"],["io","Infraorder"],["fs","Superfamily"],["f","Family"],["sf","Subfamily"],["tr","Tribe"],["g","Genus"]];
 // order -> [infraclass, clade] (informal clades, after Prum 2015 / Jarvis 2014; approximate)
 const HI={};const H=(ic,cd,os)=>os.split(" ").forEach(o=>HI[o]=[ic,cd]);
@@ -243,7 +246,7 @@ async function work(){
    if($("co").value){clearTimeout(rt);rt=setTimeout(render,1500)}
   }catch(e){if(++cfail>=3){coff=true;cq.length=0}}
   await new Promise(r=>setTimeout(r,80))}}
-function csv(t){const r=[];let w=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==","){w.push(f);f=""}else if(c=="\n"){w.push(f);r.push(w);w=[];f=""}else if(c!="\r")f+=c}if(f||w.length){w.push(f);r.push(w)}return r}
+function csv(t,d=","){const r=[];let w=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==d){w.push(f);f=""}else if(c=="\n"){w.push(f);r.push(w);w=[];f=""}else if(c!="\r")f+=c}if(f||w.length){w.push(f);r.push(w)}return r}
 function fillCo(){const v=$("co").value,L=[...new Set(D.filter(d=>!d.x).flatMap(d=>d.co).concat(Object.keys(NM)))].map(c=>[(NM[c]||INV[c]||c)+" ("+c+")",c]).sort((a,b)=>a[0].localeCompare(b[0],"en"));$("co").length=1;L.forEach(([t,c])=>$("co").add(new Option(t,c)));$("co").value=v}
 function setTax(rows){const old=Object.fromEntries(BIRDS.map(d=>[d.s,d]));BIRDS=rows.map(([o,f,s,c,code,x])=>{const p=old[s];return{k:"Animalia",p:"Chordata",cl:"Aves",o,f,g:s.split(" ")[0],s,c,code,x:x?1:(p?p.x:0),st:p?p.st:"?",co:p?p.co:[]}});rebuild()}
 $("tb").onclick=()=>$("tx").click();
