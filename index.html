@@ -30,7 +30,7 @@ header select{max-width:48%;min-width:0;text-overflow:ellipsis}header{max-width:
 <label style="white-space:nowrap"><input type="checkbox" id="ex"> Include extinct</label><select id="md"><option value="hide">Unselected: hide</option><option value="dim">Unselected: shrink + recolor</option></select>
 <span style="flex-basis:100%;height:0"></span><button id="zo">−</button><button id="zi">+</button><button id="zr">100%</button>
 <button id="up" title="Collapse one level">▲ Up</button><button id="dn" title="Expand one level">▼ Down</button>
-<input type="file" id="tx" accept=".csv" hidden><input type="file" id="sx" accept=".csv" hidden><input type="file" id="f" accept=".csv" hidden>
+<input type="file" id="tx" accept=".csv,text/csv,text/plain,application/vnd.ms-excel" hidden><input type="file" id="sx" accept=".csv,text/csv,text/plain,application/vnd.ms-excel" hidden><input type="file" id="f" accept=".csv,text/csv,text/plain,application/vnd.ms-excel" hidden>
 </header><div id="msg"></div><div id="wrap"><div id="tree"></div></div>
 <div id="lb"><img alt=""><span></span></div>
 <div id="toast" onclick="this.style.display='none'"></div>
@@ -156,9 +156,12 @@ $("zi").onclick=()=>{zoom=Math.min(2.5,zoom+.15);render()};$("zo").onclick=()=>{
 $("dn").onclick=()=>{depth=Math.min(RANKS.length,depth+1);ov.clear();render()};$("up").onclick=()=>{depth=Math.max(0,depth-1);ov.clear();render()};
 $("wrap").addEventListener("wheel",e=>{if(e.ctrlKey){e.preventDefault();zoom=Math.min(2.5,Math.max(.3,zoom*(e.deltaY<0?1.1:.9)));render()}},{passive:false});
 $("imp").onclick=()=>$("f").click();
-$("f").onchange=async e=>{const tx=await e.target.files[0].text(),rows=tx.split(/\r?\n/),hd=rows[0].split(","),i=hd.findIndex(x=>/scientific[ _]name/i.test(x));
- if(i<0)return notify("No 'Scientific Name' column found. Use eBird (My eBird → Download My Data) or an iNaturalist export.");
- const names=new Set(D.map(d=>d.s));const b0=life.size;let n=0;rows.slice(1).forEach(r=>{const c=r.split(",")[i]?.replace(/"/g,"").trim();if(c&&names.has(c)){life.add(c);n++}});save();render();notify(`✓ Life list imported: ${life.size-b0} new species added. Your list now has ${life.size}.`)};
+$("f").onchange=async e=>{const R=csv((await e.target.files[0].text()).replace(/^\uFEFF/,"")),h=R[0].map(x=>x.trim().toLowerCase());
+ let i=h.indexOf("taxon_species_name");if(i<0)i=h.findIndex(x=>/^scientific[ _]name$/.test(x));if(i<0)i=h.findIndex(x=>/scientific[ _]name/.test(x));
+ if(i<0)return notify("No scientific name column found. Columns seen: "+h.slice(0,8).join(", "));
+ const names=new Set(D.map(d=>d.s)),all=new Set(),miss=new Set(),b0=life.size;
+ R.slice(1).forEach(r=>{const w=(r[i]||"").trim().split(/\s+/).slice(0,2);if(w.length<2)return;const c=w.join(" ");all.add(c);if(names.has(c))life.add(c);else miss.add(c)});
+ save();render();notify(`✓ Life list imported: ${life.size-b0} new species added (${all.size-miss.size} of ${all.size} species in the file matched the loaded list). Your list now has ${life.size}.`+(miss.size?" Unmatched names are usually species missing from the loaded list or named differently there.":""))};
 const RANKS=[["k","Kingdom"],["p","Phylum"],["cl","Class"],["sc","Subclass"],["ic","Infraclass"],["mg","Magnorder"],["so","Superorder"],["cd","Clade"],["o","Order"],["sb","Suborder"],["io","Infraorder"],["fs","Superfamily"],["f","Family"],["sf","Subfamily"],["tr","Tribe"],["g","Genus"]];
 // order -> [infraclass, clade] (informal clades, after Prum 2015 / Jarvis 2014; approximate)
 const HI={};const H=(ic,cd,os)=>os.split(" ").forEach(o=>HI[o]=[ic,cd]);
