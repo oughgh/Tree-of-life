@@ -102,7 +102,7 @@ function imgOf(p){try{const tx=p.revisions[0].slots.main.content.slice(0,30000),
  const f=m[1].replace(/<!--.*?-->/g,"").replace(/^\s*\[*\s*(file|image)\s*:/i,"").replace(/\]+\s*$/,"").trim();
  return/\.(jpe?g|png|gif|webp|tiff?|svg)$/i.test(f)?f.replace(/ /g,"_"):""}catch(e){return""}}
 async function wiki(titles){const u="https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1&origin=*&prop=revisions&rvprop=content&rvslots=main&titles="+encodeURIComponent(titles.join("|"));
- const q=(await(await fetch(u)).json()).query||{},nm={},rd={},pg={};
+ const q=(await gj(u)).query||{},nm={},rd={},pg={};
  (q.normalized||[]).forEach(n=>nm[n.from]=n.to);(q.redirects||[]).forEach(n=>rd[n.from]=n.to);(q.pages||[]).forEach(p=>{if(!p.missing)pg[p.title]=p});
  const out={};titles.forEach(t=>{let c=nm[t]||t;for(let i=0;i<3;i++)c=rd[c]||c;const p=pg[c];if(!p)return;let st="";
   try{const m=/\|\s*status\s*=\s*\[{0,2}\s*([A-Za-z]{2})\b/.exec(p.revisions[0].slots.main.content.slice(0,30000));if(m&&COL[m[1].toUpperCase()])st=m[1].toUpperCase()}catch(e){}
@@ -116,7 +116,7 @@ async function flush(){const b=Q.splice(0,20);if(Q.length)qt=setTimeout(flush,40
    if(d&&v[0]&&(d.cl!=="Mammalia"||d.st==="?")){d.st=v[0];const c=x.el.closest&&x.el.closest(".sp"),t=c&&c.querySelector(".st");if(t){t.textContent=v[0];t.style.background=COL[v[0]];t.title=ICON[v[0]]}}
    if(v[1]&&x.el.isConnected)x.el.replaceWith(mkImg(v[1],x.s))});
   try{localStorage.setItem("sd",JSON.stringify(SD))}catch(e){}
- }catch(e){off=true}}
+ }catch(e){if(!pOK)off=true}}
 let lpActive=false;
 document.addEventListener("pointerup",()=>setTimeout(()=>{lpActive=false},400));
 function walk(items,ranks,path,out){if(!ranks.length)return;group(items,ranks[0][0]).forEach(([l,kids])=>{const k=l===""?path+"/·":path+"/"+l;if(l!=="")out.push(k);walk(kids,ranks.slice(1),k,out)})}
@@ -225,50 +225,55 @@ function mkNM(){NM={};for(const k in I2)NM[I2[k][0]]=I2[k][1]}mkNM();
 function pick(r){const min=Math.max(MINC,r[0]*FRAC);let o=r[1].filter(c=>c[1]>=min).map(c=>c[0]);if(!o.length&&r[1].length)o=[r[1][0][0]];return o}
 function applyCT(){D.forEach(d=>{const r=CT[d.s];if(!d.x&&r){const l=pick(r);if(l.length)d.co=l}})}
 applyCT();
-const gj=async u=>{const r=await fetch(u);if(!r.ok)throw 0;return r.json()};
+const gj=async u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),25000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok){const e=new Error("http");e.st=r.status;e.ra=+r.headers.get("retry-after")||0;throw e}return await r.json()}finally{clearTimeout(t)}};
 async function loadEnum(){if(Object.keys(I2).length)return;(await gj("https://api.gbif.org/v1/enumeration/country")).forEach(c=>{if(c.iso2&&c.iso3)I2[c.iso2]=[c.iso3,c.title]});
  try{localStorage.setItem("i2",JSON.stringify(I2))}catch(e){}mkNM()}
 let BYS=null;const by=s=>{if(!BYS)BYS=new Map(D.map(d=>[d.s,d]));return BYS.get(s)};
 const cset=new Set();let nw=0,rt=0,enumP=null;
 let ca=0,cd=0;function applyOne(s){const d=by(s),r=CT[s];if(d&&!d.x&&r){const l=pick(r);if(l.length)d.co=l}}
 function ctry(s,bg){const d=by(s);if(coff||!d||d.x||d.cl==="Mammalia"||s in CT)return;if(cset.has(s)){if(!bg){const i=cq.indexOf(s);if(i>0){cq.splice(i,1);cq.unshift(s)}}return}cset.add(s);ca++;bg?cq.push(s):cq.unshift(s);kick()}
-function kick(){if(coff||paused)return;while(nw<4&&cq.length){nw++;work().finally(()=>{nw--;if(!nw&&!cq.length){try{localStorage.setItem("ct2",JSON.stringify(CT))}catch(e){}if($("co").value)render()}})}}
+function kick(){if(coff||paused)return;while(nw<3&&cq.length){nw++;work().finally(()=>{nw--;if(!nw&&!cq.length){try{localStorage.setItem("ct2",JSON.stringify(CT))}catch(e){}if($("co").value)render()}else if(cq.length&&!coff&&!paused)setTimeout(kick,2000)})}}
 async function work(){
- try{enumP=enumP||loadEnum();await enumP}catch(e){coff=true;cq.length=0;return}
+ try{enumP=enumP||loadEnum();await enumP}catch(e){enumP=null;if(!cOK){coff=true;cq.length=0}else await sleep(15000);return}
  while(cq.length&&!coff&&!paused){const s=cq.shift();
   try{const m=await gj("https://api.gbif.org/v1/species/match?class=Aves&name="+encodeURIComponent(s));let out=[0,[]];const key=m.matchType=="EXACT"&&(m.speciesKey||m.usageKey);
    if(key){const f=await gj("https://api.gbif.org/v1/occurrence/search?limit=0&basisOfRecord=HUMAN_OBSERVATION&occurrenceStatus=PRESENT&hasCoordinate=true&facet=country&facetLimit=300&taxonKey="+key);
     const cn=((f.facets||[])[0]||{}).counts||[],tot=cn.reduce((a,c)=>a+c.count,0),iso=c=>(I2[c.name]||[c.name])[0];
     out=[tot,cn.filter(c=>c.count>=Math.max(10,tot*0.001)).map(c=>[iso(c),c.count])]}
-   CT[s]=out;cfail=0;applyOne(s);cd++;if(cd%300==0)try{localStorage.setItem("ct2",JSON.stringify(CT))}catch(e){}
+   CT[s]=out;cfail=0;cOK=true;cDelay=Math.max(150,cDelay*0.85);applyOne(s);cd++;if(cd%300==0)try{localStorage.setItem("ct2",JSON.stringify(CT))}catch(e){}
    const d=by(s),el=CARDS.get(s),t=el&&el.querySelector(".ct");if(t&&d)t.textContent=d.co.map(cc).join(", ");
    clearTimeout(ft);ft=setTimeout(()=>{if(document.activeElement!==$("co"))fillCo()},1500);
    if($("co").value){clearTimeout(rt);rt=setTimeout(render,1500)}
-  }catch(e){cd++;if(++cfail>=3){coff=true;cq.length=0}}
-  await new Promise(r=>setTimeout(r,80))}}
+  }catch(e){cfail++;cDelay=Math.min(8000,cDelay*2+200);RT[s]=(RT[s]||0)+1;if(RT[s]<5)cq.push(s);else{cd++;cSkip++}
+   await sleep(Math.max((e&&e.ra||0)*1000,cfail>=3?Math.min(60000,4000*cfail):0))}
+  await sleep(cDelay)}}
 // ---- Background preload of every photo + country list, with progress ----
-const CARDS=new Map();
+const CARDS=new Map(),sleep=ms=>new Promise(r=>setTimeout(r,ms)),RT={},PR=new Map();
+let pOK=false,cOK=false,pSkip=0,cSkip=0,pDelay=200,cDelay=150;
 let paused=false,pq=[],pa=0,pd=0,pw=0,pfail=0,pbatch=0,prT=0,doneAt=0;const pset=new Set();
 function saveAll(){try{localStorage.setItem("sd",JSON.stringify(SD))}catch(e){}try{localStorage.setItem("ct2",JSON.stringify(CT))}catch(e){}}
 function preStart(){D.forEach(d=>{if(!(d.s in SD)&&!pset.has(d.s)){pset.add(d.s);pq.push(d);pa++}});
  D.forEach(d=>{if(d.cl!=="Mammalia"&&!d.x&&!(d.s in CT))ctry(d.s,true)});
  if(pa+ca>pd+cd){$("prog").style.display="block";startP();kick()}}
-function startP(){while(pw<3&&pq.length&&!paused&&!off){pw++;pWork().finally(()=>{pw--;if(!pw)saveAll()})}}
+function startP(){while(pw<3&&pq.length&&!paused&&!off){pw++;pWork().finally(()=>{pw--;if(!pw){saveAll();if(pq.length&&!paused&&!off)setTimeout(startP,2000)}})}}
 async function pWork(){while(pq.length&&!paused&&!off){const b=pq.splice(0,20);
   try{const r=await wiki(b.map(d=>d.s)),miss=b.filter(d=>!r[d.s]&&d.c&&d.c!==d.s);
    if(miss.length){const a=await wiki(miss.map(d=>d.c));miss.forEach(d=>{if(a[d.c])r[d.s]=a[d.c]})}
    b.forEach(d=>{const v=r[d.s]||["",""];SD[d.s]=v;if(v[0]&&(d.cl!=="Mammalia"||d.st==="?"))d.st=v[0];
     const el=CARDS.get(d.s);if(el&&el.isConnected){const t=el.querySelector(".st");if(t&&v[0]&&d.st===v[0]){t.textContent=v[0];t.style.background=COL[v[0]];t.title=ICON[v[0]]}
      const ph=el.querySelector("div.ph");if(v[1]&&ph)ph.replaceWith(mkImg(v[1],d.s))}});
-   pd+=b.length;pfail=0;if(++pbatch%15==0)saveAll()}
-  catch(e){pq.unshift(...b);if(++pfail>=3)off=true}
-  await new Promise(r=>setTimeout(r,200))}}
+   pd+=b.length;pfail=0;pOK=true;pDelay=Math.max(200,pDelay*0.85);if(++pbatch%15==0)saveAll()}
+  catch(e){pfail++;pDelay=Math.min(8000,pDelay*2+200);b.forEach(d=>{const n=(PR.get(d.s)||0)+1;PR.set(d.s,n);if(n<5)pq.push(d);else{pd++;pSkip++}});if(!pOK&&pfail>=3)off=true;
+   await sleep(Math.max((e&&e.ra||0)*1000,pfail>=3?Math.min(60000,4000*pfail):0))}
+  await sleep(pDelay)}}
 $("prog").onclick=()=>{paused=!paused;if(!paused){startP();kick()}};
 setInterval(()=>{const g=$("prog");if(g.style.display==="none")return;
- if((off||coff)&&pd===0&&cd===0){g.style.display="none";return}
+ if((off||coff)&&!pOK&&!cOK){g.style.display="none";return}
  const busy=pq.length||pw||cq.length||nw;
- if(!busy&&!paused){if(!doneAt)doneAt=Date.now();g.textContent="✓ All photos and countries loaded";if(Date.now()-doneAt>6000){g.style.display="none";doneAt=0}return}
- doneAt=0;g.textContent=((off||coff)?"⚠ Stopped (network problem) – reload to resume. ":"")+`Loading photos ${pd.toLocaleString()} / ${pa.toLocaleString()} · countries ${cd.toLocaleString()} / ${ca.toLocaleString()} · tap to ${paused?"resume":"pause"}`},600);
+ if(!busy&&!paused){if(!doneAt)doneAt=Date.now();const sk=cSkip+pSkip;
+  g.textContent=sk?`✓ Finished, but ${cSkip} country and ${pSkip} photo lookups failed. They'll be retried next time you open the page.`:coff?"✓ Photos loaded. Country lookups aren't available here.":"✓ All photos and countries loaded";
+  if(Date.now()-doneAt>(sk?15000:6000)){g.style.display="none";doneAt=0}return}
+ doneAt=0;g.textContent=`Loading photos ${pd.toLocaleString()} / ${pa.toLocaleString()} · countries ${cd.toLocaleString()} / ${ca.toLocaleString()}`+((cfail>0||pfail>0)?" · retrying after errors…":"")+` · tap to ${paused?"resume":"pause"}`},600);
 let INAT={};try{INAT=JSON.parse(localStorage.getItem("inat")||"{}")}catch(e){}
 document.addEventListener("click",async e=>{const a=e.target.closest&&e.target.closest("a.inat");if(!a)return;e.preventDefault();
  const s=a.dataset.s,w=window.open("","_blank");if(!w){window.open(a.href,"_blank");return}
