@@ -97,7 +97,7 @@ function card(d,hide){const m=match(d),e=document.createElement("div");
  </div>`;
  const ph=e.querySelector(".ph");ph._s=d.s;ph._c=d.c;io.observe(ph);return e}
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){io.unobserve(x.target);photo(x.target._s,x.target);ctry(x.target._s)}}));
-function mkImg(u,s){const i=new Image();i.className="ph";i.alt="";i.title=s;
+function mkImg(u0,s){const[u,cr]=u0.split("|"),i=new Image();i.className="ph";i.alt="";i.title=s;if(cr){const[l,rt,t,bm]=cr.split(",");i.style.setProperty("object-view-box",`inset(${t}% ${rt}% ${bm}% ${l}%)`)}
  const H=/^https?:/.test(u)?[u]:["https://en.wikipedia.org/wiki/Special:FilePath/"+encodeURIComponent(u)+"?width=320","https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(u)+"?width=320"];let k=0;
  i.onerror=()=>{if(++k<H.length){i.src=H[k];return}const d=document.createElement("div");d.className="ph";d.textContent="🐦";i.replaceWith(d)};i.src=H[0];return i}
 const Q=[];let qt=0,off=false;
@@ -105,10 +105,15 @@ function nameOf(p,t){try{const m=/\|\s*name\s*=\s*([^\n|}]+)/i.exec(p.revisions[
  let n=m?m[1].replace(/<!--.*?-->/g,"").replace(/<ref.*$/i,"").replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g,"$1").replace(/'{2,}/g,"").replace(/\{\{.*?\}\}/g,"").trim():"";
  if(!n||/^(auto|yes|no|none)$/i.test(n)||n.toLowerCase()===t.toLowerCase())n=p.title.toLowerCase()!==t.toLowerCase()?p.title:"";
  return n.length>60||/[{}<>|]/.test(n)?"":n}catch(e){return""}}
-function imgOf(p){try{const tx=p.revisions[0].slots.main.content.slice(0,30000),m=/\|\s*image\s*=((?:(?!\|\s*[\w ]+=)[^\n])*)/i.exec(tx);if(!m)return"";
- const find=v=>{v=v.replace(/<!--.*?-->/g,"");const f=/([^|\[\]{}<>\n=:]+?\.(?:jpe?g|png|gif|webp|tiff?|svg))/i.exec(v);return f?f[1].trim().replace(/^(file|image)\s*:\s*/i,"").replace(/ /g,"_"):""};
- let f=find(m[1]);if(!f&&/^\s*(\{\{|\[\[)/.test(m[1])){const rest=tx.slice(m.index).split("\n")[0].replace(/^\|\s*image\s*=/i,"");f=find(rest)}
- return f}catch(e){return""}}
+function imgOf(p){try{const tx=p.revisions[0].slots.main.content.slice(0,40000).replace(/<!--[\s\S]*?-->/g,""),m=/\|\s*image\s*=/i.exec(tx);if(!m)return"";
+ let i=m.index+m[0].length,d=0,v="";   // value of the infobox's own image= field; may span lines and wrap a template like {{Easy CSS image crop|...}}
+ for(;i<tx.length;i++){const c2=tx.substr(i,2);
+  if(c2==="{{"||c2==="[["){d++;v+=c2;i++;continue}
+  if(c2==="}}"||c2==="]]"){if(d===0)break;d--;v+=c2;i++;continue}
+  if(tx[i]==="|"&&d===0)break;v+=tx[i]}
+ const f=/([^|\[\]{}<>\n=:]+?\.(?:jpe?g|png|gif|webp|tiff?|svg))/i.exec(v);if(!f)return"";
+ const cr=k=>{const q=new RegExp("crop_"+k+"_perc\\s*=\\s*([\\d.]+)","i").exec(v);return q?q[1]:"0"},c=[cr("left"),cr("right"),cr("top"),cr("bottom")];
+ return f[1].trim().replace(/^(file|image)\s*:\s*/i,"").replace(/ /g,"_")+(c.some(x=>+x>0)?"|"+c.join(","):"")}catch(e){return""}}
 async function wiki(titles){const u="https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1&origin=*&prop=revisions&rvprop=content&rvslots=main&titles="+encodeURIComponent(titles.join("|"));
  const q=(await gj(u)).query||{},nm={},rd={},pg={};
  (q.normalized||[]).forEach(n=>nm[n.from]=n.to);(q.redirects||[]).forEach(n=>rd[n.from]=n.to);(q.pages||[]).forEach(p=>{if(!p.missing)pg[p.title]=p});
@@ -193,7 +198,7 @@ let GEN={Anas:["Anatinae","Anatini"],Cygnus:["Anserinae","Cygnini"],Gallus:["Pha
 try{Object.assign(GEN,JSON.parse(localStorage.getItem("gen")||"{}"))}catch(e){}
 function applyRanks(){D.forEach(d=>{d._h=0;d._n=0;if(d.cl!=="Aves")return;const h=HI[d.o]||["",""],g=GEN[d.g]||["",""];d._h=0;d._n=0;d.sc="Neornithes";d.ic=h[0];d.cd=h[1];d.sf=g[0];d.tr=g[1]})}
 applyRanks();
-if(localStorage.getItem("sdv")!=="3"){try{localStorage.removeItem("sd");localStorage.setItem("sdv","3")}catch(e){}}
+if(localStorage.getItem("sdv")!=="4"){try{localStorage.removeItem("sd");localStorage.setItem("sdv","4")}catch(e){}}
 let SD={};try{SD=JSON.parse(localStorage.getItem("sd")||"{}")}catch(e){}
 function applySD(){D.forEach(d=>{const x=SD[d.s];if(!x)return;if(x[0]&&(d.cl!=="Mammalia"||d.st==="?")){d.st=x[0];if(x[0]=="EX")d.x=1}if(x[2]&&d.c===d.s){d.c=x[2];d._h=0;d._n=0}})}
 applySD();
