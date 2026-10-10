@@ -90,9 +90,9 @@ const filtering=()=>$("q").value||$("co").value||$("ll").value!="all";
 function group(a,k){const m={};a.forEach(x=>(m[x[k]||""]??=[]).push(x));return Object.entries(m)}
 function card(d,hide){const m=match(d),e=document.createElement("div");
  e.dataset.k="sp:"+d.s;CARDS.set(d.s,e);e.className="sp"+(d.x?" ext":"")+(m&&filtering()?" on":"")+(!m?" dim":"");
- const wp="https://en.wikipedia.org/wiki/"+d.s.replace(/ /g,"_"),eb=d.cl==="Mammalia"?"https://www.inaturalist.org/search?q="+encodeURIComponent(d.s):d.code?"https://ebird.org/species/"+d.code:"https://ebird.org/search?q="+encodeURIComponent(d.s);
+ const wp="https://en.wikipedia.org/wiki/"+d.s.replace(/ /g,"_"),eb=d.cl!=="Aves"?"https://www.inaturalist.org/search?q="+encodeURIComponent(d.s):d.code?"https://ebird.org/species/"+d.code:"https://ebird.org/search?q="+encodeURIComponent(d.s);
  e.innerHTML=`<div class="ph">🐦</div><div class="tx"><div class="nm"><b>${d.x?"† ":""}${d.c}</b>${life.has(d.s)?`<span class="ll">✓ Life list</span>`:""}</div><i>${d.s}</i><span class="st" style="background:${COL[d.st]}" title="${ICON[d.st]}">${d.st}</span>${d.x?"":`<span class="ct">${d.co.map(cc).join(", ")}</span>`}
- <a href="${wp}" target="_blank" rel="noopener">Wikipedia</a><a href="${eb}"${d.cl==="Mammalia"?` class="inat" data-s="${d.s}"`:""} target="_blank" rel="noopener">${d.cl==="Mammalia"?"iNaturalist":"eBird"}</a>
+ <a href="${wp}" target="_blank" rel="noopener">Wikipedia</a><a href="${eb}"${d.cl!=="Aves"?` class="inat" data-s="${d.s}"`:""} target="_blank" rel="noopener">${d.cl!=="Aves"?"iNaturalist":"eBird"}</a>
  </div>`;
  const ph=e.querySelector(".ph");ph._s=d.s;ph._c=d.c;io.observe(ph);return e}
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){io.unobserve(x.target);photo(x.target._s,x.target);ctry(x.target._s)}}));
@@ -117,6 +117,7 @@ async function flush(){const b=Q.splice(0,20);if(Q.length)qt=setTimeout(flush,40
    if(v[1]&&x.el.isConnected)x.el.replaceWith(mkImg(v[1],x.s))});
   try{localStorage.setItem("sd",JSON.stringify(SD))}catch(e){}
  pOK=true;lfail=0}catch(e){if(!pOK&&++lfail>=3){off=true;return}Q.unshift(...b);clearTimeout(qt);qt=setTimeout(flush,5000)}}
+function autoOpen(items,ranks,path){let ks=items,rs=ranks,pa=path;while(rs.length){const g=group(ks,rs[0][0]);if(g.length!==1)break;const[lab,kk]=g[0];if(lab==="")pa+="/·";else{pa+="/"+lab;ov.set(pa,true)}ks=kk;rs=rs.slice(1)}}
 let lpActive=false;
 document.addEventListener("pointerup",()=>setTimeout(()=>{lpActive=false},400));
 function walk(items,ranks,path,out){if(!ranks.length)return;group(items,ranks[0][0]).forEach(([l,kids])=>{const k=l===""?path+"/·":path+"/"+l;if(l!=="")out.push(k);walk(kids,ranks.slice(1),k,out)})}
@@ -134,10 +135,10 @@ function build(items,ranks,lvl,path,hide){const box=document.createElement("div"
   const w=document.createElement("div");w.className="n";
   const h=document.createElement("div");h.className="h"+(kids.every(k=>k.x)?" ext":"");h.dataset.k=key;seen.set(key,open);
   h.innerHTML=`<span>${open?"▾":"▸"}</span><span class="rk">${name}</span><b>${kids.every(k=>k.x)?"† ":""}${label}</b><small>${filtering()?n+"/":""}${kids.length} species</small><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(label.replace(/ /g,"_"))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Wikipedia</a>`;
-  h.onclick=()=>{if(lpActive)return;forceA=key;ov.set(key,!open);render()};
+  h.onclick=()=>{if(lpActive)return;forceA=key;ov.set(key,!open);if(!open)autoOpen(kids,ranks.slice(1),key);render()};
   lp(h,()=>{const ks=[];walk(kids,ranks.slice(1),key,ks);const all=ks.length>0&&ks.every(k=>ov.get(k)===true);ks.forEach(k=>ov.set(k,!all));ov.set(key,true);forceA=key;notify((all?"Collapsed everything below ":"Expanded everything below ")+label+" ("+kids.length+" species)");render()});
   w.append(h);if(open)w.append(build(kids,ranks.slice(1),lvl+1,key,hide));box.append(w)});
- if(PH[path]&&!filtering())PH[path].forEach(([n,t])=>{const w=document.createElement("div");w.className="n";w.innerHTML=`<div class="h pl"><span class="rk">${PRK[path]}</span><b>${n}</b><span class="${t}">${t==="soon"?"(coming soon)":"(lol nope)"}</span></div>`;box.append(w)});
+ if(PH[path]&&!filtering())PH[path].forEach(([n,t])=>{const w=document.createElement("div");w.className="n";w.innerHTML=`<div class="h pl"><span class="rk">${PRK[path]}</span><b>${n}</b><span class="${t}">${t==="soon"?"(coming soon)":"(lol nope)"}</span><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(n)}" target="_blank" rel="noopener">Wikipedia</a></div>`;box.append(w)});
  return box}
 let forceA=null;
 function render(){const w=$("wrap"),wr=w.getBoundingClientRect(),wt=wr.top,wb=wr.bottom,st=w.scrollTop;let a=null,off=0,last=null,lo=0;
@@ -283,9 +284,9 @@ const needsGB=d=>d.cl!=="Mammalia";
 const PRK={"":"Kingdom","/Animalia":"Phylum","/Animalia/Chordata":"Class"};
 const PH={"":[["Plantae","soon"],["Fungi","soon"],["Protozoa","nope"],["Chromista","nope"],["Bacteria","nope"],["Archaea","nope"]],
 "/Animalia":["Arthropoda","Mollusca","Annelida","Cnidaria","Echinodermata","Nematoda","Platyhelminthes","Porifera","Rotifera","Bryozoa","Tardigrada","Nemertea","Ctenophora","Brachiopoda","Chaetognatha","Onychophora","Placozoa"].map(n=>[n,"soon"]),
-"/Animalia/Chordata":["Reptilia","Actinopterygii","Chondrichthyes","Sarcopterygii","Myxini","Hyperoartia","Ascidiacea","Leptocardii"].map(n=>[n,"soon"])};
-const AMPH=new Set(["anura","caudata","gymnophiona","urodela","apoda"]);
-function mkOth(r){const[s,c,cl,sc,o,f,sf,g,st,x,cs]=r;return{k:"Animalia",p:"Chordata",cl,sc,ic:"",cd:"",o,f,sf,tr:"",g,s,c,st,x:x?1:0,dom:0,code:"",co:cs?cs.split("|"):[]}}
+"/Animalia/Chordata":["Actinopterygii","Chondrichthyes","Sarcopterygii","Myxini","Hyperoartia","Ascidiacea","Leptocardii"].map(n=>[n,"soon"])};
+const AMPH=new Set(["anura","caudata","gymnophiona","urodela","apoda"]),REPT=new Set(["sauria","serpentes","amphisbaenia","squamata","testudines","crocodylia","rhynchocephalia","sphenodontia","lacertilia","ophidia"]),SQ=new Set(["sauria","serpentes","amphisbaenia","lacertilia","ophidia"]);
+function mkOth(r){const[s,c,cl,sc,o,f,sf,g,st,x,cs,sb]=r;return{k:"Animalia",p:"Chordata",cl,sc,ic:"",cd:"",o,sb:sb||"",f,sf,tr:"",g,s,c,st,x:x?1:0,dom:0,code:"",co:cs?cs.split("|"):[]}}
 function setOth(cl,rows){OTHER=OTHER.filter(d=>d.cl!==cl).concat(rows.map(mkOth));rebuild()}
 function loadAny(text,fromFile){const l1=text.split(/\r?\n/,1)[0],dl=[",","\t",";","|"].map(c=>[c,l1.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0],R=csv(text,dl),h=R[0].map(x=>x.trim().toLowerCase());
  if(h.includes("sciname")&&h.includes("maincommonname"))return loadMam(R,fromFile);
@@ -298,10 +299,11 @@ function loadGen(R,fromFile){const H=R[0].map(x=>x.trim().toLowerCase().replace(
  R.slice(1).forEach(r=>{if(I.ts>=0&&/synonym|invalid|doubtful|nomen|unavailable/i.test(v(r,"ts")))return;
   let n=I.s>=0?v(r,"s"):"",sp=I.sp>=0?v(r,"sp"):"";if(!n||(!/[ _]/.test(n)&&I.g>=0&&sp))n=sp.includes(" ")?sp:(v(r,"g")+" "+sp);
   const w=n.replace(/_/g," ").trim().split(/\s+/).slice(0,2);if(w.length<2)return;const s=up(w[0].toLowerCase())+" "+w[1].toLowerCase();if(seen.has(s))return;seen.add(s);
-  const o=rk(v(r,"o")),cl=I.cl>=0?rk(v(r,"cl")):(AMPH.has(o.toLowerCase())?"Amphibia":"");if(!cl){noClass++;return}
+  let o=rk(v(r,"o"));const ol=o.toLowerCase(),cl=I.cl>=0?rk(v(r,"cl")):(AMPH.has(ol)?"Amphibia":REPT.has(ol)?"Reptilia":"");if(!cl){noClass++;return}
+  let sbv="";if(cl==="Reptilia"&&SQ.has(ol)){sbv=o;o="Squamata"}
   const st=v(r,"st").toUpperCase(),c0=v(r,"c").split(/[,;|]/)[0].trim(),x=I.x>=0&&v(r,"x")&&!/^(0|false|no|na)$/i.test(v(r,"x"))?1:0;
-  (byCl[cl]=byCl[cl]||[]).push([s,c0&&!/^na$/i.test(c0)?c0:s,cl,cl==="Amphibia"?"Lissamphibia":"",o,rk(v(r,"f")),rk(v(r,"sf")),w[0]?up(w[0].toLowerCase()):"",COL[st]&&st!=="?"?st:"?",x||st==="EX"?1:0,""])});
- const cls=Object.keys(byCl);if(!cls.length)return notify("Couldn't tell which animal group this file is"+(noClass?" (no class column, and the orders aren't amphibians)":"")+". Columns seen: "+H.slice(0,10).join(", "));
+  (byCl[cl]=byCl[cl]||[]).push([s,c0&&!/^na$/i.test(c0)?c0:s,cl,cl==="Amphibia"?"Lissamphibia":"",o,rk(v(r,"f")),rk(v(r,"sf")),w[0]?up(w[0].toLowerCase()):"",COL[st]&&st!=="?"?st:"?",x||st==="EX"?1:0,"",sbv])});
+ const cls=Object.keys(byCl);if(!cls.length)return notify("Couldn't tell which animal group this file is"+(noClass?" (no class column, and the orders aren't amphibians or reptiles)":"")+". Columns seen: "+H.slice(0,10).join(", "));
  cls.forEach(cl=>{const rows=byCl[cl];setOth(cl,rows);
   if(!fromFile)try{const o=JSON.parse(localStorage.getItem("oth")||"{}");o[cl]=rows;localStorage.setItem("oth",JSON.stringify(o))}catch(x){notify(cl+" loaded, but it's too big to remember between visits.")}});
  render();notify("✓ "+cls.map(cl=>cl+": "+byCl[cl].length+" species ("+byCl[cl].filter(r=>r[9]).length+" extinct)").join(" · ")+(fromFile?" – loaded from the site":""))}
@@ -322,6 +324,6 @@ try{const o=JSON.parse(localStorage.getItem("oth")||"{}");Object.keys(o).forEach
 try{const t=localStorage.getItem("mam");if(t)setMam(JSON.parse(t))}catch(e){}
 enumP=loadEnum();enumP.then(fillCo).catch(()=>{});fillCo();render();
 fetch("clements.csv").then(r=>r.ok?r.text():null).then(t=>{if(t&&t.length>1000&&!/^\s*<(!doctype|html)/i.test(t))loadAny(t,true)}).catch(()=>{});
-fetch("amphibians.csv").then(r=>r.ok?r.text():null).then(t=>{if(t&&t.length>1000&&!/^\s*<(!doctype|html)/i.test(t))loadAny(t,true)}).catch(()=>{});
+["amphibians.csv","reptiles.csv"].forEach(f=>fetch(f).then(r=>r.ok?r.text():null).then(t=>{if(t&&t.length>1000&&!/^\s*<(!doctype|html)/i.test(t))loadAny(t,true)}).catch(()=>{}));
 fetch("mdd.csv").then(r=>r.ok?r.text():null).then(t=>{if(t&&t.length>1000&&!/^\s*<(!doctype|html)/i.test(t))loadAny(t,true)}).catch(()=>{});
 </script></body></html>
