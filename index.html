@@ -84,8 +84,9 @@ const $=i=>document.getElementById(i);
 function notify(m){const t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(notify.t);notify.t=setTimeout(()=>t.style.display="none",8000)}
 const nz=t=>t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9|]+/g," ").replace(/\s+/g," ").trim();
 function match(d){const co=$("co").value;return mnc(d)&&(!co||(!d.x&&d.co.includes(co)))}
-function mnc(d){const q=nz($("q").value),ll=$("ll").value;
- return(!q||(d._h||(d._h=nz([d.c,d.s,d.k,d.p,d.cl,d.sc,d.ic,d.cd,d.mg,d.so,d.o,d.sb,d.io,d.fs,d.f,d.sf,d.tr,d.g].join("|")))).includes(q)||(d._n||(d._n=d._h.replace(/ /g,""))).includes(q.replace(/ /g,"")))&&(ll=="all"||(ll=="in")==life.has(d.s))}
+const sz=t=>nz(t.replace(/[’']/g,""));
+function mnc(d){const q=sz($("q").value),ll=$("ll").value;
+ return(!q||((d._h||(d._h=" "+sz([d.c,d.s,d.k,d.p,d.cl,d.sc,d.ic,d.cd,d.mg,d.so,d.o,d.sb,d.io,d.fs,d.f,d.sf,d.tr,d.g].join(" "))+" ")),q.split(" ").every(t=>d._h.includes(" "+t))))&&(ll=="all"||(ll=="in")==life.has(d.s))}
 const filtering=()=>$("q").value||$("co").value||$("ll").value!="all";
 function group(a,k){const m={};a.forEach(x=>(m[x[k]||""]??=[]).push(x));return Object.entries(m)}
 function card(d,hide){const m=match(d),e=document.createElement("div");
@@ -96,15 +97,18 @@ function card(d,hide){const m=match(d),e=document.createElement("div");
  </div>`;
  const ph=e.querySelector(".ph");ph._s=d.s;ph._c=d.c;io.observe(ph);return e}
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){io.unobserve(x.target);photo(x.target._s,x.target);ctry(x.target._s)}}));
-function mkImg(u,s){const i=new Image();i.className="ph";i.alt="";i.title=s;i.onerror=()=>{const d=document.createElement("div");d.className="ph";d.textContent="🐦";i.replaceWith(d)};i.src=/^https?:/.test(u)?u:"https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(u)+"?width=320";return i}
+function mkImg(u,s){const i=new Image();i.className="ph";i.alt="";i.title=s;
+ const H=/^https?:/.test(u)?[u]:["https://en.wikipedia.org/wiki/Special:FilePath/"+encodeURIComponent(u)+"?width=320","https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(u)+"?width=320"];let k=0;
+ i.onerror=()=>{if(++k<H.length){i.src=H[k];return}const d=document.createElement("div");d.className="ph";d.textContent="🐦";i.replaceWith(d)};i.src=H[0];return i}
 const Q=[];let qt=0,off=false;
 function nameOf(p,t){try{const m=/\|\s*name\s*=\s*([^\n|}]+)/i.exec(p.revisions[0].slots.main.content.slice(0,30000));
  let n=m?m[1].replace(/<!--.*?-->/g,"").replace(/<ref.*$/i,"").replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g,"$1").replace(/'{2,}/g,"").replace(/\{\{.*?\}\}/g,"").trim():"";
  if(!n||/^(auto|yes|no|none)$/i.test(n)||n.toLowerCase()===t.toLowerCase())n=p.title.toLowerCase()!==t.toLowerCase()?p.title:"";
  return n.length>60||/[{}<>|]/.test(n)?"":n}catch(e){return""}}
-function imgOf(p){try{const tx=p.revisions[0].slots.main.content.slice(0,30000),m=/\|\s*image\s*=\s*([^\n|}]+)/i.exec(tx);if(!m)return"";
- const f=m[1].replace(/<!--.*?-->/g,"").replace(/^\s*\[*\s*(file|image)\s*:/i,"").replace(/\]+\s*$/,"").trim();
- return/\.(jpe?g|png|gif|webp|tiff?|svg)$/i.test(f)?f.replace(/ /g,"_"):""}catch(e){return""}}
+function imgOf(p){try{const tx=p.revisions[0].slots.main.content.slice(0,30000),m=/\|\s*image\s*=((?:(?!\|\s*[\w ]+=)[^\n])*)/i.exec(tx);if(!m)return"";
+ const find=v=>{v=v.replace(/<!--.*?-->/g,"");const f=/([^|\[\]{}<>\n=:]+?\.(?:jpe?g|png|gif|webp|tiff?|svg))/i.exec(v);return f?f[1].trim().replace(/^(file|image)\s*:\s*/i,"").replace(/ /g,"_"):""};
+ let f=find(m[1]);if(!f&&/^\s*(\{\{|\[\[)/.test(m[1])){const rest=tx.slice(m.index).split("\n")[0].replace(/^\|\s*image\s*=/i,"");f=find(rest)}
+ return f}catch(e){return""}}
 async function wiki(titles){const u="https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1&origin=*&prop=revisions&rvprop=content&rvslots=main&titles="+encodeURIComponent(titles.join("|"));
  const q=(await gj(u)).query||{},nm={},rd={},pg={};
  (q.normalized||[]).forEach(n=>nm[n.from]=n.to);(q.redirects||[]).forEach(n=>rd[n.from]=n.to);(q.pages||[]).forEach(p=>{if(!p.missing)pg[p.title]=p});
@@ -189,7 +193,7 @@ let GEN={Anas:["Anatinae","Anatini"],Cygnus:["Anserinae","Cygnini"],Gallus:["Pha
 try{Object.assign(GEN,JSON.parse(localStorage.getItem("gen")||"{}"))}catch(e){}
 function applyRanks(){D.forEach(d=>{d._h=0;d._n=0;if(d.cl!=="Aves")return;const h=HI[d.o]||["",""],g=GEN[d.g]||["",""];d._h=0;d._n=0;d.sc="Neornithes";d.ic=h[0];d.cd=h[1];d.sf=g[0];d.tr=g[1]})}
 applyRanks();
-if(localStorage.getItem("sdv")!=="2"){try{localStorage.removeItem("sd");localStorage.setItem("sdv","2")}catch(e){}}
+if(localStorage.getItem("sdv")!=="3"){try{localStorage.removeItem("sd");localStorage.setItem("sdv","3")}catch(e){}}
 let SD={};try{SD=JSON.parse(localStorage.getItem("sd")||"{}")}catch(e){}
 function applySD(){D.forEach(d=>{const x=SD[d.s];if(!x)return;if(x[0]&&(d.cl!=="Mammalia"||d.st==="?")){d.st=x[0];if(x[0]=="EX")d.x=1}if(x[2]&&d.c===d.s){d.c=x[2];d._h=0;d._n=0}})}
 applySD();
