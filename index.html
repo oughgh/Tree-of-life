@@ -348,12 +348,12 @@ const PH={"":[["Plantae","soon"],["Fungi","soon"],["Protozoa","nope"],["Chromist
 "/Animalia/Chordata":["Actinopterygii","Chondrichthyes","Sarcopterygii","Myxini","Hyperoartia","Ascidiacea","Leptocardii"].map(n=>[n,"soon"])};
 const AMPH=new Set(["anura","caudata","gymnophiona","urodela","apoda"]),REPT=new Set(["sauria","serpentes","amphisbaenia","squamata","testudines","crocodylia","rhynchocephalia","sphenodontia","lacertilia","ophidia"]),SQ=new Set(["sauria","serpentes","amphisbaenia","lacertilia","ophidia"]);
 function mkOth(r){const[s,c,cl,sc,o,f,sf,g,st,x,cs,sb,lc,ph]=r;return{k:"Animalia",p:ph||"Chordata",cl,sc,ic:"",cd:"",o,sb:sb||"",f,sf,tr:"",g,s,c,st,x:x?1:0,dom:0,lc:lc?1:0,code:"",co:cs?cs.split("|"):[]}}
-function setOth(cl,rows){OTHER=OTHER.filter(d=>d.cl!==cl).concat(rows.map(mkOth));rebuild()}
-function loadAny(text,fromFile){const l1=text.split(/\r?\n/,1)[0],dl=[",","\t",";","|"].map(c=>[c,l1.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0],R=csv(text,dl),h=R[0].map(x=>x.trim().toLowerCase());
+function setOth(rows,src){OTHER=OTHER.filter(d=>d.src!==src).concat(rows.map(r=>{const d=mkOth(r);d.src=src;return d}));rebuild()}
+function loadAny(text,fromFile,src){const l1=text.split(/\r?\n/,1)[0],dl=[",","\t",";","|"].map(c=>[c,l1.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0],R=csv(text,dl),h=R[0].map(x=>x.trim().toLowerCase());
  if(h.includes("sciname")&&h.includes("maincommonname"))return loadMam(R,fromFile);
  if(h.includes("scientific name")||h.includes("sci_name"))return loadTax(R,fromFile);
- return loadGen(R,fromFile)}
-function loadGen(R,fromFile){const H=R[0].map(x=>x.trim().toLowerCase().replace(/[^a-z0-9]+/g,"_")),col=(...re)=>H.findIndex(h=>re.some(e=>e.test(h)));
+ return loadGen(R,fromFile,src)}
+function loadGen(R,fromFile,src){const H=R[0].map(x=>x.trim().toLowerCase().replace(/[^a-z0-9]+/g,"_")),col=(...re)=>H.findIndex(h=>re.some(e=>e.test(h)));
  const I={s:col(/^(scientific_?name|sciname|species_name|binomial|genus_species|taxon_name|canonical_?name)$/),sp:col(/^(species|specific_?epithet|epithet)$/),g:col(/^genus$/),c:col(/^(common|english|vernacular|main_?common)/),o:col(/^order(_name)?$/),f:col(/^family(_name)?$/),sf:col(/^sub_?family$/),cl:col(/^class(_name)?$/),st:col(/iucn|red_?list/),ts:col(/^(taxonomic_?status|synonym|is_?synonym)$/),x:col(/^extinct$/),sc:col(/^sub_?class$/),loc:col(/^(locations?|distribution_codes|country_codes)$/),ph:col(/^phylum$/)};
  if(I.o<0||I.f<0||(I.s<0&&I.sp<0))return notify("Couldn't recognise this file. Columns seen: "+H.slice(0,10).join(", "));
  const v=(r,k)=>I[k]<0?"":(r[I[k]]||"").trim(),up=t=>t?t[0].toUpperCase()+t.slice(1):"",seen=new Set(),byCl={};let noClass=0;
@@ -365,8 +365,8 @@ function loadGen(R,fromFile){const H=R[0].map(x=>x.trim().toLowerCase().replace(
   const st=v(r,"st").toUpperCase(),c0=v(r,"c").split(/[,;|]/)[0].trim(),x=I.x>=0&&v(r,"x")&&!/^(0|false|no|na)$/i.test(v(r,"x"))?1:0;
   (byCl[cl]=byCl[cl]||[]).push([s,c0&&!/^na$/i.test(c0)?c0:s,cl,rk(v(r,"sc"))||(cl==="Amphibia"?"Lissamphibia":""),o,rk(v(r,"f")),rk(v(r,"sf")),w[0]?up(w[0].toLowerCase()):"",COL[st]&&st!=="?"?st:"?",x||st==="EX"?1:0,I.loc<0?"":[...new Set(v(r,"loc").split(/[|;,]/).map(t=>t.trim()).filter(t=>VALID.has(t)))].join("|"),sbv,I.loc<0?0:1,I.ph>=0?rk(v(r,"ph")):""])});
  const cls=Object.keys(byCl);if(!cls.length)return notify("Couldn't tell which animal group this file is"+(noClass?" (no class column, and the orders aren't amphibians or reptiles)":"")+". Columns seen: "+H.slice(0,10).join(", "));
- cls.forEach(cl=>{const rows=byCl[cl];setOth(cl,rows);
-  if(!fromFile)try{const o=JSON.parse(localStorage.getItem("oth")||"{}");o[cl]=rows;localStorage.setItem("oth",JSON.stringify(o))}catch(x){notify(cl+" loaded, but it's too big to remember between visits.")}});
+ const allRows=cls.flatMap(cl=>byCl[cl]),key=src||cls.join("+")+":"+[...new Set(allRows.map(r=>r[4]))].sort().slice(0,3).join(",");setOth(allRows,key);
+ if(!fromFile)try{const o=JSON.parse(localStorage.getItem("oth")||"{}");o[key]=allRows;localStorage.setItem("oth",JSON.stringify(o))}catch(x){notify("Loaded, but it's too big to remember between visits.")}
  render();notify("✓ "+cls.map(cl=>cl+": "+byCl[cl].length+" species ("+byCl[cl].filter(r=>r[9]).length+" extinct)").join(" · ")+(fromFile?" – loaded from the site":""))}
 function csv(t,d=","){const r=[];let w=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==d){w.push(f);f=""}else if(c=="\n"){w.push(f);r.push(w);w=[];f=""}else if(c!="\r")f+=c}if(f||w.length){w.push(f);r.push(w)}return r}
 function fillCo(){const v=$("co").value,co=$("co"),used=new Set(D.filter(d=>!d.x).flatMap(d=>d.co));
@@ -384,10 +384,10 @@ function loadTax(R,fromFile){const h=R[0].map(x=>x.trim()),ix=rx=>h.findIndex(x=
  render();notify("✓ "+(fromFile?"Loaded clements.csv from the site":"Full species list loaded")+": "+rows.length+" species ("+rows.filter(r=>r[5]).length+" extinct)."+(I.x<0&&I.y<0?" No 'extinct' column was found in this file, so no extinct species could be flagged.":""))}
 $("tx").onchange=async e=>loadAny(await e.target.files[0].text(),false);
 try{const t=localStorage.getItem("tax");if(t)setTax(JSON.parse(t))}catch(e){}
-try{const o=JSON.parse(localStorage.getItem("oth")||"{}");Object.keys(o).forEach(cl=>setOth(cl,o[cl]))}catch(e){}
+try{const o=JSON.parse(localStorage.getItem("oth")||"{}");Object.keys(o).forEach(k=>setOth(o[k],k))}catch(e){}
 try{const t=localStorage.getItem("mam");if(t)setMam(JSON.parse(t))}catch(e){}
 enumP=loadEnum();enumP.then(fillCo).catch(()=>{});fillCo();render();
 fetch("clements.csv").then(r=>r.ok?r.text():null).then(t=>{if(t&&t.length>1000&&!/^\s*<(!doctype|html)/i.test(t))loadAny(t,true)}).catch(()=>{});
-["amphibians.csv","reptiles.csv","fish.csv","odonata.csv","butterflies.csv"].forEach(f=>fetch(f).then(r=>r.ok?r.text():null).then(t=>{if(t&&t.length>1000&&!/^\s*<(!doctype|html)/i.test(t))loadAny(t,true)}).catch(()=>{}));
+["amphibians.csv","reptiles.csv","fish.csv","odonata.csv","butterflies.csv"].forEach(f=>fetch(f).then(r=>r.ok?r.text():null).then(t=>{if(t&&t.length>1000&&!/^\s*<(!doctype|html)/i.test(t))loadAny(t,true,f)}).catch(()=>{}));
 fetch("mdd.csv").then(r=>r.ok?r.text():null).then(t=>{if(t&&t.length>1000&&!/^\s*<(!doctype|html)/i.test(t))loadAny(t,true)}).catch(()=>{});
 </script></body></html>
