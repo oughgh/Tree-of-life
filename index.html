@@ -270,10 +270,10 @@ async function work(){
 // ---- Background preload of every photo + country list, with progress ----
 let WKR={};const NOWP=new Set();try{JSON.parse(localStorage.getItem("nowp")||"[]").forEach(x=>NOWP.add(x))}catch(e){}
 const CARDS=new Map(),sleep=ms=>new Promise(r=>setTimeout(r,ms)),RT={},PR=new Map();
-let lfail=0,pOK=false,cOK=false,pSkip=0,cSkip=0,pDelay=200,cDelay=150;
+let FS=null,lfail=0,pOK=false,cOK=false,pSkip=0,cSkip=0,pDelay=200,cDelay=150;
 let paused=false,pq=[],pa=0,pd=0,pw=0,pfail=0,pbatch=0,prT=0,doneAt=0;const pset=new Set();
 function saveAll(){try{localStorage.setItem("sd",JSON.stringify(SD))}catch(e){}try{localStorage.setItem("ct2",JSON.stringify(CT))}catch(e){}}
-function preStart(){D.forEach(d=>GENS.add(d.g));
+function preStart(){D.forEach(d=>GENS.add(d.g));FS={n:D.length,c:D.filter(d=>!needsGB(d)).length,s:D.filter(d=>d.ss!==undefined).length};
  D.forEach(d=>{if(needsGB(d)&&!d.x&&!(d.s in CT))ctry(d.s,true);if(!d.x&&d.co.includes("USA")&&!(d.s in ST))stq(d.s,true);if(d.c===d.s&&!(d.s in NMS)&&!(SD[d.s]&&SD[d.s].length>=3)&&!nset.has(d.s)){nset.add(d.s);nq.push(d);na++}});
  if(ca>cd||na>nd||sa>sdn){$("prog").style.display="block";kick();startN();skick()}}
 function startP(){while(pw<3&&pq.length&&!paused&&!off){pw++;pWork().finally(()=>{pw--;if(!pw){saveAll();if(pq.length&&!paused&&!off)setTimeout(startP,2000)}})}}
@@ -333,7 +333,7 @@ setInterval(()=>{const g=$("prog");if(g.style.display==="none")return;
  const busy=cq.length||nw||nq.length||kw||sq.length||sw,sk=cSkip+nSkip+sSkip;
  if(!busy&&!paused){if(!doneAt)doneAt=Date.now();g.textContent=sk?`✓ Finished, but ${sk} lookups failed. They'll be retried next time you open the page.`:"✓ All country lists and common names loaded";if(Date.now()-doneAt>(sk?15000:6000)){g.style.display="none";doneAt=0}return}
  doneAt=0;const parts=[];if(ca)parts.push(`country lists ${cd.toLocaleString()} / ${ca.toLocaleString()}`);if(sa)parts.push(`US states ${sdn.toLocaleString()} / ${sa.toLocaleString()}`);if(na)parts.push(`common names ${nd.toLocaleString()} / ${na.toLocaleString()}`);
- g.textContent="Loading "+parts.join(" · ")+((cfail>0||nfail>0)?" · retrying after errors…":"")+` · tap to ${paused?"resume":"pause"}`},600);
+ g.textContent="Loading "+parts.join(" · ")+((cfail>0||nfail>0)?" · retrying after errors…":"")+(FS?` · the data files already cover countries for ${FS.c.toLocaleString()} and US states for ${FS.s.toLocaleString()} of ${FS.n.toLocaleString()} species`:"")+` · tap to ${paused?"resume":"pause"}`},600);
 let INAT={};try{INAT=JSON.parse(localStorage.getItem("inat")||"{}")}catch(e){}
 document.addEventListener("click",async e=>{const a=e.target.closest&&e.target.closest("a.inat");if(!a)return;e.preventDefault();
  const s=a.dataset.s,w=window.open("","_blank");if(!w){window.open(a.href,"_blank");return}
