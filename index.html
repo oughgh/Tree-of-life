@@ -95,9 +95,9 @@ const filtering=()=>$("q").value||$("co").value||$("ll").value!="all"||$("st").v
 function group(a,k){const m={};a.forEach(x=>(m[x[k]||""]??=[]).push(x));return Object.entries(m)}
 function card(d,hide){const m=match(d),e=document.createElement("div");
  e.dataset.k="sp:"+d.s;CARDS.set(d.s,e);e.className="sp"+(isX(d)?" ext":"")+(m&&filtering()?" on":"")+(!m?" dim":"");
- const wt=d.wp||d.s,wp="https://en.wikipedia.org/wiki/"+encodeURIComponent(wt.replace(/ /g,"_")),noW=d.wp==="-"||NOWP.has(d.s),eb=d.cl!=="Aves"?"https://www.inaturalist.org/search?q="+encodeURIComponent(d.s):d.code?"https://ebird.org/species/"+d.code:"https://ebird.org/search?q="+encodeURIComponent(d.s);
+ const wt=d.wp||d.s,wp="https://en.wikipedia.org/wiki/"+encodeURIComponent(wt.replace(/ /g,"_")),noW=d.wp==="-"||NOWP.has(d.s),isB=d.cl==="Aves",ii=!isB&&/^\d+$/.test(d.ii||"")?d.ii:"",noI=!isB&&(d.ii==="-"||INATNO.has(d.s)),eb=!isB?(ii?"https://www.inaturalist.org/taxa/"+ii:"https://www.inaturalist.org/search?q="+encodeURIComponent(d.s)):d.code?"https://ebird.org/species/"+d.code:"https://ebird.org/search?q="+encodeURIComponent(d.s);
  e.innerHTML=`<div class="ph">🐦</div><div class="tx"><div class="nm"><b>${isX(d)?"† ":""}${d.c}</b>${life.has(d.s)?`<span class="ll">✓ Life list</span>`:""}</div><i>${d.s}</i><span class="st" style="background:${COL[d.st]}" title="${ICON[d.st]}">${d.st}</span>${d.x?"":`<span class="ct">${ctText(d)}</span>`}
- ${noW?"":`<a class="wk" href="${wp}" target="_blank" rel="noopener">Wikipedia</a>`}<a href="${eb}"${d.cl!=="Aves"?` class="inat" data-s="${d.s}"`:""} target="_blank" rel="noopener">${d.cl!=="Aves"?"iNaturalist":"eBird"}</a>
+ ${noW?"":`<a class="wk" href="${wp}" target="_blank" rel="noopener">Wikipedia</a>`}${noI?"":`<a href="${eb}"${!isB&&!ii?` class="inat" data-s="${d.s}"`:""} target="_blank" rel="noopener">${isB?"eBird":"iNaturalist"}</a>`}
  </div>`;
  const ph=e.querySelector(".ph");ph._s=d.s;ph._c=d.c;io.observe(ph);return e}
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){io.unobserve(x.target);photo(x.target._s,x.target);ctry(x.target._s)}}));
@@ -223,17 +223,17 @@ const ISO="AFG:Afghanistan;ALB:Albania;DZA:Algeria;ASM:American Samoa;AND:Andorr
 const N2C={};ISO.split(";").forEach(e=>{const i=e.indexOf(":"),c=e.slice(0,i),n=e.slice(i+1);CC[n]=c;N2C[nz(n)]=c});
 Object.entries({"united states of america":"USA","usa":"USA","russian federation":"RUS","czechia":"CZE","cote d ivoire":"CIV","burma":"MMR","swaziland":"SWZ","macedonia":"MKD","east timor":"TLS","timor leste":"TLS","congo":"COG","dr congo":"COD","democratic republic of congo":"COD","the gambia":"GMB","brunei darussalam":"BRN","lao pdr":"LAO","iran islamic republic of":"IRN","syrian arab republic":"SYR","tanzania united republic of":"TZA","viet nam":"VNM","cabo verde":"CPV","turkiye":"TUR","republic of korea":"KOR","democratic people s republic of korea":"PRK","korea south":"KOR","korea north":"PRK","bolivia plurinational state of":"BOL","venezuela bolivarian republic of":"VEN","micronesia federated states of":"FSM","vatican":"VAT","holy see":"VAT","uk":"GBR","great britain":"GBR","palestinian territory":"PSE","state of palestine":"PSE","hong kong sar":"HKG","macau":"MAC","pitcairn":"PCN","falkland islands malvinas":"FLK","saint helena ascension and tristan da cunha":"SHN"}).forEach(([n,c])=>N2C[n]=c);
 const cap=t=>t?t.toLowerCase().replace(/^./,m=>m.toUpperCase()):"",rk=t=>{t=(t||"").trim();return!t||/^na$/i.test(t)?"":cap(t)};
-function mkMam(r){const[s,c,sc,ic,mg,so,o,sb,io,fs,f,sf,tr,g,st,x,dom,cs,ss,wp]=r;return{k:"Animalia",p:"Chordata",cl:"Mammalia",sc,ic,mg,so,cd:"",o,sb,io,fs,f,sf,tr,g,s,c,st,x:x?1:0,dom,code:"",co:cs?cs.split("|"):[],ss:ss==null?undefined:(ss?ss.split("|"):[]),wp:(wp==null||wp==="")?undefined:wp}}
+function mkMam(r){const[s,c,sc,ic,mg,so,o,sb,io,fs,f,sf,tr,g,st,x,dom,cs,ss,wp,ii]=r;return{k:"Animalia",p:"Chordata",cl:"Mammalia",sc,ic,mg,so,cd:"",o,sb,io,fs,f,sf,tr,g,s,c,st,x:x?1:0,dom,code:"",co:cs?cs.split("|"):[],ss:ss==null?undefined:(ss?ss.split("|"):[]),wp:(wp==null||wp==="")?undefined:wp,ii:(ii==null||ii==="")?undefined:ii}}
 function rebuild(){clearTimeout(prT);prT=setTimeout(preStart,2500);D=BIRDS.concat(MAMS,OTHER);BYS=null;ov.clear();depth=0;applyRanks();applySD();applyNm();applyCT();D.forEach(d=>{if(d.ss!==undefined)ST[d.s]=d.ss});applyST();fillCo()}
 function setMam(rows){MAMS=rows.map(mkMam);rebuild()}
 function loadMam(R,fromFile){const h=R[0].map(x=>x.trim().toLowerCase()),ix=n=>h.indexOf(n);
- const I={s:ix("sciname"),c:ix("maincommonname"),sc:ix("subclass"),ic:ix("infraclass"),mg:ix("magnorder"),so:ix("superorder"),o:ix("order"),sb:ix("suborder"),io:ix("infraorder"),fs:ix("superfamily"),f:ix("family"),sf:ix("subfamily"),tr:ix("tribe"),g:ix("genus"),st:ix("iucnstatus"),x:ix("extinct"),dm:ix("domestic"),co:ix("countrydistribution"),ss:ix("us_states"),wp:ix("wikipedia")};
+ const I={s:ix("sciname"),c:ix("maincommonname"),sc:ix("subclass"),ic:ix("infraclass"),mg:ix("magnorder"),so:ix("superorder"),o:ix("order"),sb:ix("suborder"),io:ix("infraorder"),fs:ix("superfamily"),f:ix("family"),sf:ix("subfamily"),tr:ix("tribe"),g:ix("genus"),st:ix("iucnstatus"),x:ix("extinct"),dm:ix("domestic"),co:ix("countrydistribution"),ss:ix("us_states"),wp:ix("wikipedia"),ii:ix("inaturalist")};
  if(I.s<0||I.o<0||I.f<0)return notify("Mammal file needs sciName, order and family columns.");
  const v=(r,k)=>I[k]<0?"":(r[I[k]]||"").trim(),yes=t=>!!t&&!/^(0|false|no|na)$/i.test(t);
  const rows=R.slice(1).filter(r=>r[I.s]).map(r=>{const s=v(r,"s").replace(/_/g," "),st=v(r,"st").toUpperCase(),dom=yes(v(r,"dm"))?1:0,c0=v(r,"c"),
   cs=[...new Set(v(r,"co").split("|").map(t=>t.trim()).filter(t=>t&&!t.endsWith("?")).map(t=>N2C[nz(t)]).filter(Boolean))];
   return[s,/^na$/i.test(c0)||!c0?s:c0,rk(v(r,"sc")),rk(v(r,"ic")),rk(v(r,"mg")),rk(v(r,"so")),rk(v(r,"o")),rk(v(r,"sb")),rk(v(r,"io")),rk(v(r,"fs")),rk(v(r,"f")),rk(v(r,"sf")),rk(v(r,"tr")),cap(v(r,"g"))||s.split(" ")[0],
-   dom?"DOM":(COL[st]&&st!=="?"?st:"?"),yes(v(r,"x"))||st==="EX"?1:0,dom,cs.join("|"),I.ss<0||v(r,"ss")==="~"?null:v(r,"ss"),I.wp<0?null:v(r,"wp")]});
+   dom?"DOM":(COL[st]&&st!=="?"?st:"?"),yes(v(r,"x"))||st==="EX"?1:0,dom,cs.join("|"),I.ss<0||v(r,"ss")==="~"?null:v(r,"ss"),I.wp<0?null:v(r,"wp"),I.ii<0?null:v(r,"ii")]});
  if(!rows.length)return notify("No mammal rows found.");setMam(rows);
  if(!fromFile)try{localStorage.setItem("mam",JSON.stringify(rows))}catch(x){notify("Mammals loaded, but they're too big to remember between visits.")}
  render();notify("✓ "+(fromFile?"Loaded mdd.csv from the site":"Mammals loaded")+": "+rows.length+" species ("+rows.filter(r=>r[15]).length+" extinct, "+rows.filter(r=>r[16]).length+" domestic).")}
@@ -268,7 +268,8 @@ async function work(){
    await sleep(Math.max((e&&e.ra||0)*1000,cfail>=3?Math.min(60000,4000*cfail):0))}
   await sleep(cDelay)}}
 // ---- Background preload of every photo + country list, with progress ----
-let WKR={};const NOWP=new Set();try{JSON.parse(localStorage.getItem("nowp")||"[]").forEach(x=>NOWP.add(x))}catch(e){}
+let WKR={};const INATNO=new Set(),NOWP=new Set();try{JSON.parse(localStorage.getItem("inatno")||"[]").forEach(x=>INATNO.add(x))}catch(e){}
+try{JSON.parse(localStorage.getItem("nowp")||"[]").forEach(x=>NOWP.add(x))}catch(e){}
 const CARDS=new Map(),sleep=ms=>new Promise(r=>setTimeout(r,ms)),RT={},PR=new Map();
 let FS=null,lfail=0,pOK=false,cOK=false,pSkip=0,cSkip=0,pDelay=200,cDelay=150;
 let paused=false,pq=[],pa=0,pd=0,pw=0,pfail=0,pbatch=0,prT=0,doneAt=0;const pset=new Set();
@@ -340,7 +341,8 @@ document.addEventListener("click",async e=>{const a=e.target.closest&&e.target.c
  try{w.document.write("<p style='font:16px sans-serif;padding:1em'>Opening iNaturalist…</p>")}catch(x){}
  try{if(!INAT[s]){const j=await gj("https://api.inaturalist.org/v1/taxa?rank=species&per_page=5&q="+encodeURIComponent(s)),t=(j.results||[]).find(x=>(x.name||"").toLowerCase()===s.toLowerCase());
    if(t){INAT[s]=t.id;try{localStorage.setItem("inat",JSON.stringify(INAT))}catch(x){}}}
-  w.location.href=INAT[s]?"https://www.inaturalist.org/taxa/"+INAT[s]:a.href}catch(x){w.location.href=a.href}});
+  if(!INAT[s]){INATNO.add(s);try{localStorage.setItem("inatno",JSON.stringify([...INATNO]))}catch(x){}const c0=CARDS.get(s),a0=c0&&c0.querySelector("a.inat");if(a0)a0.remove();w.close();notify("That species isn't on iNaturalist, so its link was removed.");return}
+  w.location.href="https://www.inaturalist.org/taxa/"+INAT[s]}catch(x){w.location.href=a.href}});
 // ---- Amphibians & other groups, placeholders for the rest of the tree of life ----
 const needsGB=d=>d.cl!=="Mammalia"&&!d.lc;const VALID=new Set([...Object.values(CC),...Object.keys(OC),"GLB"]);
 const PRK={"":"Kingdom","/Animalia":"Phylum","/Animalia/Chordata":"Class"};
@@ -350,14 +352,14 @@ const PH={"":[["Plantae","soon"],["Fungi","soon"],["Protozoa","nope"],["Chromist
 "/Animalia/Arthropoda/Insecta":["Coleoptera","Lepidoptera","Diptera","Hymenoptera","Hemiptera","Orthoptera","Blattodea","Mantodea","Phasmatodea","Ephemeroptera","Plecoptera","Trichoptera","Neuroptera","Thysanoptera","Siphonaptera","Dermaptera","Psocodea"].map(n=>[n,"soon"]),
 "/Animalia/Chordata":["Actinopterygii","Chondrichthyes","Sarcopterygii","Myxini","Hyperoartia","Ascidiacea","Leptocardii"].map(n=>[n,"soon"])};
 const AMPH=new Set(["anura","caudata","gymnophiona","urodela","apoda"]),REPT=new Set(["sauria","serpentes","amphisbaenia","squamata","testudines","crocodylia","rhynchocephalia","sphenodontia","lacertilia","ophidia"]),SQ=new Set(["sauria","serpentes","amphisbaenia","lacertilia","ophidia"]);
-function mkOth(r){const[s,c,cl,sc,o,f,sf,g,st,x,cs,sb,lc,ph,ss,wp]=r;return{k:"Animalia",p:ph||"Chordata",cl,sc,ic:"",cd:"",o,sb:sb||"",f,sf,tr:"",g,s,c,st,x:x?1:0,dom:0,lc:lc?1:0,code:"",co:cs?cs.split("|"):[],ss:ss==null?undefined:(ss?ss.split("|"):[]),wp:(wp==null||wp==="")?undefined:wp}}
+function mkOth(r){const[s,c,cl,sc,o,f,sf,g,st,x,cs,sb,lc,ph,ss,wp,ii]=r;return{k:"Animalia",p:ph||"Chordata",cl,sc,ic:"",cd:"",o,sb:sb||"",f,sf,tr:"",g,s,c,st,x:x?1:0,dom:0,lc:lc?1:0,code:"",co:cs?cs.split("|"):[],ss:ss==null?undefined:(ss?ss.split("|"):[]),wp:(wp==null||wp==="")?undefined:wp,ii:(ii==null||ii==="")?undefined:ii}}
 function setOth(rows,src){OTHER=OTHER.filter(d=>d.src!==src).concat(rows.map(r=>{const d=mkOth(r);d.src=src;return d}));rebuild()}
 function loadAny(text,fromFile,src){const l1=text.split(/\r?\n/,1)[0],dl=[",","\t",";","|"].map(c=>[c,l1.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0],R=csv(text,dl),h=R[0].map(x=>x.trim().toLowerCase());
  if(h.includes("sciname")&&h.includes("maincommonname"))return loadMam(R,fromFile);
  if(h.includes("scientific name")||h.includes("sci_name"))return loadTax(R,fromFile);
  return loadGen(R,fromFile,src)}
 function loadGen(R,fromFile,src){const H=R[0].map(x=>x.trim().toLowerCase().replace(/[^a-z0-9]+/g,"_")),col=(...re)=>H.findIndex(h=>re.some(e=>e.test(h)));
- const I={s:col(/^(scientific_?name|sciname|species_name|binomial|genus_species|taxon_name|canonical_?name)$/),sp:col(/^(species|specific_?epithet|epithet)$/),g:col(/^genus$/),c:col(/^(common|english|vernacular|main_?common)/),o:col(/^order(_name)?$/),f:col(/^family(_name)?$/),sf:col(/^sub_?family$/),cl:col(/^class(_name)?$/),st:col(/iucn|red_?list/),ts:col(/^(taxonomic_?status|synonym|is_?synonym)$/),x:col(/^extinct$/),sc:col(/^sub_?class$/),loc:col(/^(locations?|distribution_codes|country_codes)$/),ph:col(/^phylum$/),ss:col(/^us_?states?$/),wp:col(/^wikipedia(_title)?$/)};
+ const I={s:col(/^(scientific_?name|sciname|species_name|binomial|genus_species|taxon_name|canonical_?name)$/),sp:col(/^(species|specific_?epithet|epithet)$/),g:col(/^genus$/),c:col(/^(common|english|vernacular|main_?common)/),o:col(/^order(_name)?$/),f:col(/^family(_name)?$/),sf:col(/^sub_?family$/),cl:col(/^class(_name)?$/),st:col(/iucn|red_?list/),ts:col(/^(taxonomic_?status|synonym|is_?synonym)$/),x:col(/^extinct$/),sc:col(/^sub_?class$/),loc:col(/^(locations?|distribution_codes|country_codes)$/),ph:col(/^phylum$/),ss:col(/^us_?states?$/),wp:col(/^wikipedia(_title)?$/),ii:col(/^inaturalist(_id)?$/)};
  if(I.o<0||I.f<0||(I.s<0&&I.sp<0))return notify("Couldn't recognise this file. Columns seen: "+H.slice(0,10).join(", "));
  const v=(r,k)=>I[k]<0?"":(r[I[k]]||"").trim(),up=t=>t?t[0].toUpperCase()+t.slice(1):"",seen=new Set(),byCl={};let noClass=0;
  R.slice(1).forEach(r=>{if(I.ts>=0&&/synonym|invalid|doubtful|nomen|unavailable/i.test(v(r,"ts")))return;
@@ -366,7 +368,7 @@ function loadGen(R,fromFile,src){const H=R[0].map(x=>x.trim().toLowerCase().repl
   let o=rk(v(r,"o"));const ol=o.toLowerCase(),cl=I.cl>=0?rk(v(r,"cl")):(AMPH.has(ol)?"Amphibia":REPT.has(ol)?"Reptilia":"");if(!cl){noClass++;return}
   let sbv="";if(cl==="Reptilia"&&SQ.has(ol)){sbv=o;o="Squamata"}
   const st=v(r,"st").toUpperCase(),c0=v(r,"c").split(/[,;|]/)[0].trim(),x=I.x>=0&&v(r,"x")&&!/^(0|false|no|na)$/i.test(v(r,"x"))?1:0;
-  (byCl[cl]=byCl[cl]||[]).push([s,c0&&!/^na$/i.test(c0)?c0:s,cl,rk(v(r,"sc"))||(cl==="Amphibia"?"Lissamphibia":""),o,rk(v(r,"f")),rk(v(r,"sf")),w[0]?up(w[0].toLowerCase()):"",COL[st]&&st!=="?"?st:"?",x||st==="EX"?1:0,I.loc<0?"":[...new Set(v(r,"loc").split(/[|;,]/).map(t=>t.trim()).filter(t=>VALID.has(t)))].join("|"),sbv,I.loc<0||v(r,"loc")==="~"?0:1,I.ph>=0?rk(v(r,"ph")):"",I.ss<0||v(r,"ss")==="~"?null:v(r,"ss"),I.wp<0?null:v(r,"wp")])});
+  (byCl[cl]=byCl[cl]||[]).push([s,c0&&!/^na$/i.test(c0)?c0:s,cl,rk(v(r,"sc"))||(cl==="Amphibia"?"Lissamphibia":""),o,rk(v(r,"f")),rk(v(r,"sf")),w[0]?up(w[0].toLowerCase()):"",COL[st]&&st!=="?"?st:"?",x||st==="EX"?1:0,I.loc<0?"":[...new Set(v(r,"loc").split(/[|;,]/).map(t=>t.trim()).filter(t=>VALID.has(t)))].join("|"),sbv,I.loc<0||v(r,"loc")==="~"?0:1,I.ph>=0?rk(v(r,"ph")):"",I.ss<0||v(r,"ss")==="~"?null:v(r,"ss"),I.wp<0?null:v(r,"wp"),I.ii<0?null:v(r,"ii")])});
  Object.values(byCl).forEach(arr=>{const gf={};
   arr.forEach(x=>{if(x[5]&&x[7]){const o=gf[x[7]]=gf[x[7]]||{};o[x[5]]=(o[x[5]]||0)+1}});
   arr.forEach(x=>{if(!x[5]&&x[7]&&gf[x[7]]){const o=gf[x[7]];x[5]=Object.keys(o).sort((p,q)=>o[q]-o[p])[0]}});   // blank family -> the family other species of that genus have
