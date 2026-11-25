@@ -1,5 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Tree of Life</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🌳%3C/text%3E%3C/svg%3E">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f4ee;--fg:#222;--card:#fff;--ln:#b9b19c;--ac:#2f6f4f}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1d1a;--fg:#e8e6df;--card:#272a26;--ln:#5b5f55;--ac:#6fc79a}}
@@ -21,10 +22,10 @@ header select{max-width:48%;min-width:0;text-overflow:ellipsis}header{max-width:
 .ph{width:64px;height:64px;border-radius:6px;background:#8884;flex:none;object-fit:cover;display:grid;place-items:center;font-size:26px}
 .sp i{display:block;opacity:.75}.st{display:inline-block;color:#000;font-size:11px;font-weight:700;padding:0 6px;border-radius:9px;margin-right:4px}
 .sp a{color:var(--lk);margin-right:8px}.tx{flex:1;min-width:0}.nm{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}.ll{flex:none;white-space:nowrap;color:#1a9e55;font-weight:700;font-size:12px}.ct{font-size:11px;opacity:.7;margin:2px 0}
-#toast{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:90%;background:var(--ac);color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 2px 10px #0006;z-index:20;font-weight:600}#im{display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--ln);border-radius:8px;box-shadow:0 4px 14px #0005;z-index:30;min-width:220px;overflow:hidden}#im.open{display:block}#im button{display:block;width:100%;text-align:left;border:0;border-radius:0;padding:11px 12px}#wrap{overflow-anchor:none}img.ph{cursor:zoom-in}#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:40;align-items:center;justify-content:center;flex-direction:column;padding:12px;cursor:zoom-out}#lb.open{display:flex}#lb img{max-width:100%;max-height:90%;object-fit:contain}#lb span{color:#ddd;margin-top:8px;font-style:italic}#prog{display:none;padding:4px 10px;font-size:12px;background:var(--card);border-bottom:1px solid var(--ln);cursor:pointer}:root{--lk:#1f6fdb}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lk:#7db3ff}}:root[data-theme="dark"]{--lk:#7db3ff}#msg{padding:4px 10px;font-size:12px;opacity:.7}
+#toast{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:90%;background:var(--ac);color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 2px 10px #0006;z-index:20;font-weight:600}#im{display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--ln);border-radius:8px;box-shadow:0 4px 14px #0005;z-index:30;min-width:220px;overflow:hidden}#im.open{display:block}#im button{display:block;width:100%;text-align:left;border:0;border-radius:0;padding:11px 12px}#wrap{overflow-anchor:none}img.ph{cursor:zoom-in}#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:40;align-items:center;justify-content:center;flex-direction:column;padding:12px;cursor:zoom-out}#lb.open{display:flex}#lb img{max-width:100%;max-height:90%;object-fit:contain}#lb span{color:#ddd;margin-top:8px;font-style:italic}#prog{display:none;padding:4px 10px;font-size:12px;background:var(--card);border-bottom:1px solid var(--ln);cursor:pointer}:root{--lk:#1f6fdb}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lk:#7db3ff}}:root[data-theme="dark"]{--lk:#7db3ff}#spin{display:none;position:absolute;right:30px;top:50%;margin-top:-8px;width:14px;height:14px;border:2px solid var(--ln);border-top-color:var(--ac);border-radius:50%;will-change:transform;animation:spn .8s linear infinite;pointer-events:none}#spin.on{display:block}@keyframes spn{to{transform:rotate(360deg)}}#msg{padding:4px 10px;font-size:12px;opacity:.7}
 </style></head><body>
-<header><h1>🌳 Tree of Life</h1><span style="position:relative;margin-left:auto"><button id="ib" type="button">⬆ Import ▾</button><div id="im"><button id="imp" type="button">Import life list CSV</button></div></span>
-<span style="position:relative;display:inline-block;flex:1 1 150px"><input id="q" placeholder="Search name, order, family, genus…" size="26" style="padding-right:26px;width:100%"><button id="qx" type="button" title="Clear search" style="display:none;position:absolute;right:2px;top:50%;transform:translateY(-50%);border:0;background:none;padding:2px 6px;font-size:16px;line-height:1">×</button></span>
+<header><h1>🌳 Tree of Life</h1><span style="margin-left:auto"><button id="imp" type="button">⬆ Import life list</button></span>
+<span style="position:relative;display:inline-block;flex:1 1 150px"><input id="q" placeholder="Search name, order, family, genus…" size="26" style="padding-right:50px;width:100%"><span id="spin"></span><button id="qx" type="button" title="Clear search" style="display:none;position:absolute;right:2px;top:50%;transform:translateY(-50%);border:0;background:none;padding:2px 6px;font-size:16px;line-height:1">×</button></span>
 <label style="white-space:nowrap"><input type="checkbox" id="ex"> Include extinct</label><span style="flex-basis:100%;height:0"></span>
 <select id="co"><option value="">All countries</option></select><select id="st" style="display:none"><option value="">All states</option></select>
 <select id="ll"><option value="all">Show all</option><option value="in">On my list</option><option value="out">NOT on my list</option></select>
@@ -87,11 +88,14 @@ const save=()=>{try{localStorage.setItem("life",JSON.stringify([...life]))}catch
 const $=i=>document.getElementById(i);
 function notify(m){const t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(notify.t);notify.t=setTimeout(()=>t.style.display="none",8000)}
 const nz=t=>t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9|]+/g," ").replace(/\s+/g," ").trim();
-function match(d){const co=$("co").value,st=co==="USA"?$("st").value:"";return mnc(d)&&(!co||(!d.x&&(d.co.includes(co)||d.co.includes("GLB"))))&&(!st||(d.ss&&d.ss.includes(st)))}
+let FQ=null,RID=0,qt2=0;
 const sz=t=>nz(t.replace(/[’']/g,""));
-function mnc(d){const q=sz($("q").value),ll=$("ll").value;
- return(!q||((d._h||(d._h=" "+sz([d.c,d.s,d.k,d.p,d.cl,d.sc,d.ic,d.cd,d.mg,d.so,d.o,d.sb,d.io,d.fs,d.f,d.sf,d.tr,d.g].join(" "))+" ")),q.split(" ").every(t=>d._h.includes(" "+t))))&&(ll=="all"||(ll=="in")==life.has(d.s))}
-const filtering=()=>$("q").value||$("co").value||$("ll").value!="all"||$("st").value;
+const snapF=()=>{const q=sz($("q").value),co=$("co").value;return{q,t:q?q.split(" "):[],co,st:co==="USA"?$("st").value:"",ll:$("ll").value}};
+function mnc(d){const F=FQ||snapF();
+ return(!F.q||((d._h||(d._h=" "+sz([d.c,d.s,d.k,d.p,d.cl,d.sc,d.ic,d.cd,d.mg,d.so,d.o,d.sb,d.io,d.fs,d.f,d.sf,d.tr,d.g].join(" "))+" ")),F.t.every(t=>d._h.includes(" "+t))))&&(F.ll=="all"||(F.ll=="in")==life.has(d.s))}
+function match(d){const F=FQ;if(F&&d._mr===RID)return d._mv;const G=F||snapF(),co=G.co,st=G.st;
+ const v=!!(mnc(d)&&(!co||(!d.x&&(d.co.includes(co)||d.co.includes("GLB"))))&&(!st||(d.ss&&d.ss.includes(st))));if(F){d._mr=RID;d._mv=v}return v}
+const filtering=()=>{const F=FQ||snapF();return F.q||F.co||F.ll!="all"||F.st};
 function group(a,k){const m={};a.forEach(x=>(m[x[k]||""]??=[]).push(x));return Object.entries(m)}
 function card(d,hide){const m=match(d),e=document.createElement("div");
  e.dataset.k="sp:"+d.s;CARDS.set(d.s,e);e.className="sp"+(isX(d)?" ext":"")+(m&&filtering()?" on":"")+(!m?" dim":"");
@@ -101,7 +105,7 @@ function card(d,hide){const m=match(d),e=document.createElement("div");
  </div>`;
  const ph=e.querySelector(".ph");ph._s=d.s;ph._c=d.c;io.observe(ph);return e}
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){io.unobserve(x.target);photo(x.target._s,x.target);ctry(x.target._s)}}));
-function mkImg(u0,s){const[u,cr]=u0.split("|"),i=new Image();i.className="ph";i.alt="";i.title=s;if(cr){const[l,rt,t,bm]=cr.split(",");i.style.setProperty("object-view-box",`inset(${t}% ${rt}% ${bm}% ${l}%)`)}
+function mkImg(u0,s,cred){const[u,cr]=u0.split("|"),i=new Image();i.className="ph";i.alt="";i.title=s+(cred?" — photo: "+cred:"");if(cr){const[l,rt,t,bm]=cr.split(",");i.style.setProperty("object-view-box",`inset(${t}% ${rt}% ${bm}% ${l}%)`)}
  const H=/^https?:/.test(u)?[u]:["https://en.wikipedia.org/wiki/Special:FilePath/"+encodeURIComponent(u)+"?width=320","https://commons.wikimedia.org/wiki/Special:FilePath/"+encodeURIComponent(u)+"?width=320"];let k=0;
  i.onerror=()=>{if(++k<H.length){i.src=H[k];return}const d=document.createElement("div");d.className="ph";d.textContent="🐦";i.replaceWith(d)};i.src=H[0];return i}
 const Q=[];let qt=0,off=false;
@@ -124,12 +128,23 @@ async function wiki(titles){const u="https://en.wikipedia.org/w/api.php?action=q
  const out={};titles.forEach(t=>{let c=nm[t]||t;for(let i=0;i<3;i++)c=rd[c]||c;const p=pg[c];if(!p)return;let st="";
   try{const m=/\|\s*status\s*=\s*\[{0,2}\s*([A-Za-z]{2})\b/.exec(p.revisions[0].slots.main.content.slice(0,30000));if(m&&COL[m[1].toUpperCase()])st=m[1].toUpperCase()}catch(e){}
   out[t]=[st,imgOf(p),nameOf(p,t)]});return out}
-function photo(s,el){const e=SD[s],u0=e&&e[1];if(u0)el.replaceWith(mkImg(u0,s));
+const INATPH={};try{Object.assign(INATPH,JSON.parse(localStorage.getItem("inatph")||"{}"))}catch(e){}
+let ipq=[],ipt=0,ipBusy=false;
+function ipush(s){if(INATPH[s]!==undefined||ipq.some(x=>x===s))return;ipq.push(s);clearTimeout(ipt);ipt=setTimeout(ipRun,400)}
+function setPh(s,ph){const u=ph&&(ph.medium_url||ph.url);INATPH[s]=u?{u,c:(ph.attribution||"").slice(0,70)}:"-";if(u){const c=CARDS.get(s),pe=c&&c.querySelector("div.ph");if(pe)pe.replaceWith(mkImg(u,s,INATPH[s].c))}}
+async function ipRun(){if(ipBusy)return;ipBusy=true;
+ try{while(ipq.length){const b=ipq.splice(0,30),ids=[],byId={},rest=[];
+   b.forEach(s=>{const d=by(s),ii=d&&/^\d+$/.test(d.ii||"")?d.ii:(INAT[s]||"");if(ii){ids.push(ii);(byId[ii]=byId[ii]||[]).push(s)}else rest.push(s)});
+   if(ids.length){try{const j=await gj("https://api.inaturalist.org/v1/taxa?per_page=30&id="+ids.join(",")),got={};(j.results||[]).forEach(t=>{got[t.id]=t.default_photo});ids.forEach(id=>(byId[id]||[]).forEach(s=>setPh(s,got[id])))}catch(e){}}
+   for(const s of rest){try{const j=await gj("https://api.inaturalist.org/v1/taxa?rank=species&per_page=5&q="+encodeURIComponent(s)),t=(j.results||[]).find(y=>(y.name||"").toLowerCase()===s.toLowerCase());setPh(s,t&&t.default_photo)}catch(e){}await sleep(1100)}
+   await sleep(1200)}}
+ finally{ipBusy=false;try{localStorage.setItem("inatph",JSON.stringify(INATPH))}catch(e){}}}
+function photo(s,el){const e=SD[s],u0=e&&e[1],ip=INATPH[s];if(u0)el.replaceWith(mkImg(u0,s));else if(ip&&ip!=="-")el.replaceWith(mkImg(ip.u,s,ip.c));else if(e&&ip===undefined)ipush(s);
  const needName=el._c===s&&(!e||e.length<3);if(off||(e&&!needName))return;Q.push({s,el,c:el._c});clearTimeout(qt);qt=setTimeout(flush,250)}
 async function flush(){const b=Q.splice(0,20);if(Q.length)qt=setTimeout(flush,400);
  try{const r=await wiki(b.map(x=>x.s)),miss=b.filter(x=>!r[x.s]&&x.c);
   if(miss.length){const a=await wiki(miss.map(x=>x.c));miss.forEach(x=>{if(a[x.c])r[x.s]=a[x.c]})}
-  b.forEach(x=>{if(!r[x.s]&&!NOWP.has(x.s)){NOWP.add(x.s);const c0=CARDS.get(x.s),a0=c0&&c0.querySelector("a.wk");if(a0)a0.remove()}const v=r[x.s]||["","",""];SD[x.s]=v;const d=D.find(y=>y.s===x.s);if(d&&v[2]&&d.c===d.s){d.c=v[2];d._h=0;d._n=0;const cd=CARDS.get(x.s),nb=cd&&cd.querySelector(".nm b");if(nb)nb.textContent=(isX(d)?"† ":"")+v[2]}
+  b.forEach(x=>{if(!r[x.s]&&!NOWP.has(x.s)){NOWP.add(x.s);const c0=CARDS.get(x.s),a0=c0&&c0.querySelector("a.wk");if(a0)a0.remove()}const v=r[x.s]||["","",""];SD[x.s]=v;if(!v[1])ipush(x.s);const d=D.find(y=>y.s===x.s);if(d&&v[2]&&d.c===d.s){d.c=v[2];d._h=0;d._n=0;const cd=CARDS.get(x.s),nb=cd&&cd.querySelector(".nm b");if(nb)nb.textContent=(isX(d)?"† ":"")+v[2]}
    if(d&&v[0]&&(d.cl!=="Mammalia"||d.st==="?")){d.st=v[0];const c=x.el.closest&&x.el.closest(".sp"),t=c&&c.querySelector(".st");if(t){t.textContent=v[0];t.style.background=COL[v[0]];t.title=ICON[v[0]]}if(c&&d.st==="EX"){c.classList.add("ext");const nb=c.querySelector(".nm b");if(nb&&!nb.textContent.startsWith("†"))nb.textContent="† "+nb.textContent}}
    if(v[1]&&x.el.isConnected)x.el.replaceWith(mkImg(v[1],x.s))});
   try{localStorage.setItem("sd",JSON.stringify(SD))}catch(e){}
@@ -164,14 +179,16 @@ function render(){const w=$("wrap"),wr=w.getBoundingClientRect(),wt=wr.top,wb=wr
  if(forceA){const e=[...w.querySelectorAll("[data-k]")].find(x=>x.dataset.k===forceA);if(e){a=forceA;off=e.getBoundingClientRect().top-wt}forceA=null}
  if(!a&&last){a=last;off=lo}
  draw();if(a){const e=[...w.querySelectorAll("[data-k]")].find(x=>x.dataset.k===a);if(e)w.scrollTop+=e.getBoundingClientRect().top-wt-off;else w.scrollTop=st}}
-$("qx").onclick=()=>{ov=new Map(seen);$("q").value="";render()};
-function draw(){seen.clear();CARDS.clear();const usa=$("co").value==="USA";$("st").style.display=usa?"":"none";if(!usa&&$("st").value)$("st").value="";$("md").style.display=filtering()?"":"none";$("qx").style.display=$("q").value?"":"none";const hide=$("md").value=="hide",t=$("tree");const items=D.filter(d=>!d.x||$("ex").checked);if($("co").value&&!coff)D.forEach(d=>{if(!d.x&&!(d.s in CT)&&mnc(d))ctry(d.s,true)});
+$("qx").onclick=()=>{ov=new Map(seen);$("q").value="";busy(render)};
+function draw(){RID++;FQ=snapF();try{draw0()}finally{FQ=null}}
+function draw0(){seen.clear();CARDS.clear();const usa=$("co").value==="USA";$("st").style.display=usa?"":"none";if(!usa&&$("st").value)$("st").value="";$("md").style.display=filtering()?"":"none";$("qx").style.display=$("q").value?"":"none";const hide=$("md").value=="hide",t=$("tree");const exOn=$("ex").checked,items=D.filter(d=>!d.x||exOn);if($("co").value&&!coff)D.forEach(d=>{if(!d.x&&!(d.s in CT)&&mnc(d))ctry(d.s,true)});
  if(usa&&!coff)D.forEach(d=>{if(!d.x&&d.co.includes("USA")&&!(d.s in ST)&&mnc(d))stq(d.s,true)});
  t.replaceChildren(build(items,(AR=RANKS.filter(([k])=>D.some(d=>d[k]))),0,"",hide));
  t.style.transform=`scale(${zoom})`;$("zr").textContent=Math.round(zoom*100)+"%";
  $("msg").textContent=`${items.filter(match).length} of ${items.length} species shown · life list: ${life.size}${cq.length?` · checking countries: ${cq.length} left`:""}`}
-["q","co","ll","md","st"].forEach(i=>$(i).oninput=()=>{if(i!="md")ov.clear();render()});
-$("ex").onchange=render;
+function busy(fn,delay){const sp=$("spin");sp.classList.add("on");clearTimeout(qt2);qt2=setTimeout(()=>requestAnimationFrame(()=>setTimeout(()=>{try{fn()}finally{sp.classList.remove("on")}},0)),delay||0)}
+["q","co","ll","md","st"].forEach(i=>$(i).oninput=()=>busy(()=>{if(i!="md")ov.clear();render()},i==="q"?350:0));
+$("ex").onchange=()=>busy(render);
 $("zi").onclick=()=>{zoom=Math.min(2.5,zoom+.15);render()};$("zo").onclick=()=>{zoom=Math.max(.3,zoom-.15);render()};$("zr").onclick=()=>{zoom=1;render()};
 $("dn").onclick=()=>{depth=Math.min(AR.length,depth+1);ov.clear();render()};$("up").onclick=()=>{depth=Math.max(0,depth-1);ov.clear();render()};
 $("wrap").addEventListener("wheel",e=>{if(e.ctrlKey){e.preventDefault();zoom=Math.min(2.5,Math.max(.3,zoom*(e.deltaY<0?1.1:.9)));render()}},{passive:false});
@@ -213,7 +230,6 @@ $("sx").onchange=async e=>{const R=csv(await e.target.files[0].text()),h=R[0].ma
   if(st||im){const o=SD[k]||["",""],ns=COL[st]?st:"";SD[k]=[ns||o[0],im||o[1]];n++}});
  try{localStorage.setItem("sd",JSON.stringify(SD))}catch(x){notify("Imported, but the data is too large to remember between visits.")}
  applySD();render();notify("✓ IUCN data / photos imported for "+n+" species.")};
-$("ib").onclick=e=>{e.stopPropagation();$("im").classList.toggle("open")};document.addEventListener("click",()=>$("im").classList.remove("open"));
 const lb=$("lb");function lbClose(){lb.classList.remove("open")}
 lb.onclick=lbClose;document.addEventListener("keydown",e=>{if(e.key=="Escape")lbClose()});
 document.addEventListener("click",e=>{const i=e.target.closest&&e.target.closest("img.ph");if(!i)return;const t=lb.querySelector("img");t.src=i.src;lb.querySelector("span").textContent=i.title||"";lb.classList.add("open");
