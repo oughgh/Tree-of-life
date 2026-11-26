@@ -22,16 +22,15 @@ header select{max-width:48%;min-width:0;text-overflow:ellipsis}header{max-width:
 .ph{width:64px;height:64px;border-radius:6px;background:#8884;flex:none;object-fit:cover;display:grid;place-items:center;font-size:26px}
 .sp i{display:block;opacity:.75}.st{display:inline-block;color:#000;font-size:11px;font-weight:700;padding:0 6px;border-radius:9px;margin-right:4px}
 .sp a{color:var(--lk);margin-right:8px}.tx{flex:1;min-width:0}.nm{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}.ll{flex:none;white-space:nowrap;color:#1a9e55;font-weight:700;font-size:12px}.ct{font-size:11px;opacity:.7;margin:2px 0}
-#toast{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:90%;background:var(--ac);color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 2px 10px #0006;z-index:20;font-weight:600}#im{display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--ln);border-radius:8px;box-shadow:0 4px 14px #0005;z-index:30;min-width:220px;overflow:hidden}#im.open{display:block}#im button{display:block;width:100%;text-align:left;border:0;border-radius:0;padding:11px 12px}#wrap{overflow-anchor:none}img.ph{cursor:zoom-in}#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:40;align-items:center;justify-content:center;flex-direction:column;padding:12px;cursor:zoom-out}#lb.open{display:flex}#lb img{max-width:100%;max-height:90%;object-fit:contain}#lb span{color:#ddd;margin-top:8px;font-style:italic}#prog{display:none;padding:4px 10px;font-size:12px;background:var(--card);border-bottom:1px solid var(--ln);cursor:pointer}:root{--lk:#1f6fdb}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lk:#7db3ff}}:root[data-theme="dark"]{--lk:#7db3ff}#spin{display:none;position:absolute;right:30px;top:50%;margin-top:-8px;width:14px;height:14px;border:2px solid var(--ln);border-top-color:var(--ac);border-radius:50%;will-change:transform;animation:spn .8s linear infinite;pointer-events:none}#spin.on{display:block}@keyframes spn{to{transform:rotate(360deg)}}#msg{padding:4px 10px;font-size:12px;opacity:.7}
+#toast{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:90%;background:var(--ac);color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 2px 10px #0006;z-index:20;font-weight:600}#im{display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--ln);border-radius:8px;box-shadow:0 4px 14px #0005;z-index:30;min-width:220px;overflow:hidden}#im.open{display:block}#im button{display:block;width:100%;text-align:left;border:0;border-radius:0;padding:11px 12px}#wrap{overflow-anchor:none}img.ph{cursor:zoom-in}#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:40;align-items:center;justify-content:center;flex-direction:column;padding:12px;cursor:zoom-out}#lb.open{display:flex}#lb img{max-width:100%;max-height:90%;object-fit:contain}#lb span{color:#ddd;margin-top:8px;font-style:italic}#prog{display:none;padding:4px 10px;font-size:12px;background:var(--card);border-bottom:1px solid var(--ln);cursor:pointer}:root{--lk:#1f6fdb}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lk:#7db3ff}}:root[data-theme="dark"]{--lk:#7db3ff}#spin{display:none;position:absolute;right:30px;top:50%;margin-top:-8px;width:14px;height:14px;border:2px solid var(--ln);border-top-color:var(--ac);border-radius:50%;will-change:transform;animation:spn .8s linear infinite;pointer-events:none}#spin.on{display:block}@keyframes spn{to{transform:rotate(360deg)}}.grp{display:inline-flex;gap:4px;align-items:center;white-space:nowrap}.vsep{width:1px;height:24px;background:var(--ln);margin:0 6px}.ct span[title]{cursor:help}#msg{padding:4px 10px;font-size:12px;opacity:.7}
 </style></head><body>
 <header><h1>🌳 Tree of Life</h1><span style="margin-left:auto"><button id="imp" type="button">⬆ Import life list</button></span>
 <span style="position:relative;display:inline-block;flex:1 1 150px"><input id="q" placeholder="Search name, order, family, genus…" size="26" style="padding-right:50px;width:100%"><span id="spin"></span><button id="qx" type="button" title="Clear search" style="display:none;position:absolute;right:2px;top:50%;transform:translateY(-50%);border:0;background:none;padding:2px 6px;font-size:16px;line-height:1">×</button></span>
 <label style="white-space:nowrap"><input type="checkbox" id="ex"> Include extinct</label><span style="flex-basis:100%;height:0"></span>
 <select id="co"><option value="">All countries</option></select><select id="st" style="display:none"><option value="">All states</option></select>
-<select id="ll"><option value="all">Show all</option><option value="in">On my list</option><option value="out">NOT on my list</option></select>
+<span id="llw" style="display:none;white-space:nowrap">Life list status: <label><input type="radio" name="llr" value="all" checked> Show all</label> <label><input type="radio" name="llr" value="in"> Show only my list</label></span>
 <select id="md"><option value="hide">Unselected: hide</option><option value="dim">Unselected: shrink + recolor</option></select>
-<span style="flex-basis:100%;height:0"></span><button id="zo">−</button><button id="zi">+</button><button id="zr">100%</button>
-<button id="up" title="Collapse one level">▲ Up</button><button id="dn" title="Expand one level">▼ Down</button>
+<span style="flex-basis:100%;height:0"></span><span class="grp">Zoom: <button id="zo">−</button><button id="zi">+</button><button id="zr">100%</button></span><span class="vsep"></span><span class="grp">Collapse: <button id="c1" title="Close the deepest open level">1 level</button><button id="ca" title="Close everything">All</button></span>
 <input type="file" id="tx" accept=".csv,text/csv,text/plain,application/vnd.ms-excel" hidden><input type="file" id="sx" accept=".csv,text/csv,text/plain,application/vnd.ms-excel" hidden><input type="file" id="f" accept=".csv,text/csv,text/plain,application/vnd.ms-excel" hidden>
 </header><div id="msg"></div><div id="prog"></div><div id="wrap"><div id="tree"></div></div>
 <div id="lb"><img alt=""><span></span></div>
@@ -77,7 +76,9 @@ Passeriformes;Hirundinidae;Hirundo;rustica;Barn Swallow;LC;Spain,United Kingdom,
 const OC={ArcO:"Arctic Sea",AtlNW:"Atlantic, Northwest",AtlNE:"Atlantic, Northeast",AtlWC:"Atlantic, Western Central",AtlEC:"Atlantic, Eastern Central",MedBS:"Mediterranean and Black Sea",AtlSW:"Atlantic, Southwest",AtlSE:"Atlantic, Southeast",AtlAn:"Atlantic, Antarctic",IndW:"Indian Ocean, Western",IndE:"Indian Ocean, Eastern",IndAn:"Indian Ocean, Antarctic",PacNW:"Pacific, Northwest",PacNE:"Pacific, Northeast",PacWC:"Pacific, Western Central",PacEC:"Pacific, Eastern Central",PacSW:"Pacific, Southwest",PacSE:"Pacific, Southeast",PacAn:"Pacific, Antarctic"};
 const isX=d=>d.x||d.st==="EX";
 const CC={Kenya:"KEN",Tanzania:"TZA",Ethiopia:"ETH","South Africa":"ZAF",Namibia:"NAM","New Zealand":"NZL",Antarctica:"ATA",Peru:"PER",Chile:"CHL",Spain:"ESP","United Kingdom":"GBR",Germany:"DEU",France:"FRA",USA:"USA",Canada:"CAN",Japan:"JPN",India:"IND","Sri Lanka":"LKA",Nepal:"NPL",Pakistan:"PAK",Thailand:"THA",Vietnam:"VNM",Indonesia:"IDN",Morocco:"MAR",Russia:"RUS",Mexico:"MEX",Brazil:"BRA","Costa Rica":"CRI",Norway:"NOR",Philippines:"PHL",Bangladesh:"BGD",Iceland:"ISL",Mauritius:"MUS",Cuba:"CUB",Venezuela:"VEN",Bahamas:"BHS",Australia:"AUS"};
-const ctText=d=>d.co.map(cc).join(", ")+(d.ss&&d.ss.length&&$("co").value==="USA"?". US states: "+d.ss.join(", "):"");
+const escA=t=>String(t).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+const cnm=c=>c==="GLB"?"Global":(OC[c]||NM[c]||INV[c]||c),snm=c=>{const e=(typeof STATES!=="undefined"?STATES:[]).find(x=>x[0]===c);return e?e[1]:c};
+const ctText=d=>d.co.map(c=>`<span title="${escA(cnm(c))}">${cc(c)}</span>`).join(", ")+(d.ss&&d.ss.length&&$("co").value==="USA"?". US states: "+d.ss.map(c=>`<span title="${escA(snm(c))}">${c}</span>`).join(", "):"");
 const cc=c=>c==="GLB"?"Glb":CC[c]||(OC[c]?c:c.length==3?c.toUpperCase():c.slice(0,3).toUpperCase());
 let D=RAW.split("\n").map(l=>{const[o,f,g,s,c,st,co]=l.split(";");return{k:"Animalia",p:"Chordata",cl:"Aves",o,f,g,s:g+" "+s,c,st,x:st==="EX"?1:0,code:"",co:co.split(",").map(cc)}});
 let BIRDS=D,MAMS=[],OTHER=[];
@@ -90,7 +91,8 @@ function notify(m){const t=$("toast");t.textContent=m;t.style.display="block";cl
 const nz=t=>t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9|]+/g," ").replace(/\s+/g," ").trim();
 let FQ=null,RID=0,qt2=0;
 const sz=t=>nz(t.replace(/[’']/g,""));
-const snapF=()=>{const q=sz($("q").value),co=$("co").value;return{q,t:q?q.split(" "):[],co,st:co==="USA"?$("st").value:"",ll:$("ll").value}};
+const llv=()=>{const x=document.querySelector("input[name=llr]:checked");return x?x.value:"all"};
+const snapF=()=>{const q=sz($("q").value),co=$("co").value;return{q,t:q?q.split(" "):[],co,st:co==="USA"?$("st").value:"",ll:llv()}};
 function mnc(d){const F=FQ||snapF();
  return(!F.q||((d._h||(d._h=" "+sz([d.c,d.s,d.k,d.p,d.cl,d.sc,d.ic,d.cd,d.mg,d.so,d.o,d.sb,d.io,d.fs,d.f,d.sf,d.tr,d.g].join(" "))+" ")),F.t.every(t=>d._h.includes(" "+t))))&&(F.ll=="all"||(F.ll=="in")==life.has(d.s))}
 function match(d){const F=FQ;if(F&&d._mr===RID)return d._mv;const G=F||snapF(),co=G.co,st=G.st;
@@ -181,16 +183,19 @@ function render(){const w=$("wrap"),wr=w.getBoundingClientRect(),wt=wr.top,wb=wr
  draw();if(a){const e=[...w.querySelectorAll("[data-k]")].find(x=>x.dataset.k===a);if(e)w.scrollTop+=e.getBoundingClientRect().top-wt-off;else w.scrollTop=st}}
 $("qx").onclick=()=>{ov=new Map(seen);$("q").value="";busy(render)};
 function draw(){RID++;FQ=snapF();try{draw0()}finally{FQ=null}}
-function draw0(){seen.clear();CARDS.clear();const usa=$("co").value==="USA";$("st").style.display=usa?"":"none";if(!usa&&$("st").value)$("st").value="";$("md").style.display=filtering()?"":"none";$("qx").style.display=$("q").value?"":"none";const hide=$("md").value=="hide",t=$("tree");const exOn=$("ex").checked,items=D.filter(d=>!d.x||exOn);if($("co").value&&!coff)D.forEach(d=>{if(!d.x&&!(d.s in CT)&&mnc(d))ctry(d.s,true)});
+function draw0(){const hasLife=life.size>0;$("llw").style.display=hasLife?"":"none";if(!hasLife&&llv()!=="all")document.querySelector("input[name=llr][value=all]").checked=true;seen.clear();CARDS.clear();const usa=$("co").value==="USA";$("st").style.display=usa?"":"none";if(!usa&&$("st").value)$("st").value="";$("md").style.display=filtering()?"":"none";$("qx").style.display=$("q").value?"":"none";const hide=$("md").value=="hide",t=$("tree");const exOn=$("ex").checked,items=D.filter(d=>!d.x||exOn);if($("co").value&&!coff)D.forEach(d=>{if(!d.x&&!(d.s in CT)&&mnc(d))ctry(d.s,true)});
  if(usa&&!coff)D.forEach(d=>{if(!d.x&&d.co.includes("USA")&&!(d.s in ST)&&mnc(d))stq(d.s,true)});
  t.replaceChildren(build(items,(AR=RANKS.filter(([k])=>D.some(d=>d[k]))),0,"",hide));
  t.style.transform=`scale(${zoom})`;$("zr").textContent=Math.round(zoom*100)+"%";
  $("msg").textContent=`${items.filter(match).length} of ${items.length} species shown · life list: ${life.size}${cq.length?` · checking countries: ${cq.length} left`:""}`}
 function busy(fn,delay){const sp=$("spin");sp.classList.add("on");clearTimeout(qt2);qt2=setTimeout(()=>requestAnimationFrame(()=>setTimeout(()=>{try{fn()}finally{sp.classList.remove("on")}},0)),delay||0)}
-["q","co","ll","md","st"].forEach(i=>$(i).oninput=()=>busy(()=>{if(i!="md")ov.clear();render()},i==="q"?350:0));
+["q","co","md","st"].forEach(i=>$(i).oninput=()=>busy(()=>{if(i!="md")ov.clear();render()},i==="q"?350:0));
 $("ex").onchange=()=>busy(render);
+$("llw").onchange=()=>busy(()=>{ov.clear();render()},0);
 $("zi").onclick=()=>{zoom=Math.min(2.5,zoom+.15);render()};$("zo").onclick=()=>{zoom=Math.max(.3,zoom-.15);render()};$("zr").onclick=()=>{zoom=1;render()};
-$("dn").onclick=()=>{depth=Math.min(AR.length,depth+1);ov.clear();render()};$("up").onclick=()=>{depth=Math.max(0,depth-1);ov.clear();render()};
+function collapse(all){let mx=-1;seen.forEach((o,k)=>{if(o){const l=k.split("/").length-2;if(l>mx)mx=l}});
+ seen.forEach((o,k)=>{if(o&&(all||k.split("/").length-2===mx))ov.set(k,false)});if(all)depth=0;busy(render)}
+$("c1").onclick=()=>collapse(false);$("ca").onclick=()=>collapse(true);
 $("wrap").addEventListener("wheel",e=>{if(e.ctrlKey){e.preventDefault();zoom=Math.min(2.5,Math.max(.3,zoom*(e.deltaY<0?1.1:.9)));render()}},{passive:false});
 $("imp").onclick=()=>$("f").click();
 $("f").onchange=async e=>{const tx=(await e.target.files[0].text()).replace(/^\uFEFF/,""),l1=tx.split(/\r?\n/)[0],
@@ -277,7 +282,7 @@ async function work(){
     const cn=((f.facets||[])[0]||{}).counts||[],tot=cn.reduce((a,c)=>a+c.count,0),iso=c=>(I2[c.name]||[c.name])[0];
     out=[tot,cn.filter(c=>c.count>=Math.max(10,tot*0.001)).map(c=>[iso(c),c.count])]}
    CT[s]=out;cfail=0;cOK=true;cDelay=Math.max(150,cDelay*0.85);applyOne(s);cd++;{const d0=by(s);if(d0&&d0.co.includes("USA"))stq(s,true)}if(cd%300==0)try{localStorage.setItem("ct2",JSON.stringify(CT))}catch(e){}
-   const d=by(s),el=CARDS.get(s),t=el&&el.querySelector(".ct");if(t&&d)t.textContent=ctText(d);
+   const d=by(s),el=CARDS.get(s),t=el&&el.querySelector(".ct");if(t&&d)t.innerHTML=ctText(d);
    clearTimeout(ft);ft=setTimeout(()=>{if(document.activeElement!==$("co"))fillCo()},1500);
    if($("co").value){clearTimeout(rt);rt=setTimeout(render,1500)}
   }catch(e){cfail++;cDelay=Math.min(8000,cDelay*2+200);RT[s]=(RT[s]||0)+1;if(RT[s]<5)cq.push(s);else{cd++;cSkip++}
